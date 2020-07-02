@@ -27,9 +27,9 @@ def get_arguments():
 
 
 def get_selected_columns():
-    """extract relevant columns for setting defined in data/columns.txt"""
+    """extract relevant columns for setting defined in params/columns.txt"""
     try:
-        with open('data/columns.txt', 'r') as f:
+        with open('../params/columns.txt', 'r') as f:
             columns = f.readlines()
     except FileNotFoundError:
         return []
@@ -38,10 +38,10 @@ def get_selected_columns():
 
 
 def get_states_flow(ds: pd.DataFrame, keep_na: bool = False, propagate: bool = True) -> pd.DataFrame:
-    """transform ricette dataset (DT-VARIABLE-VALUE)
-    into settings dataset (timestamp/row x varaibles/columns)"""
+    """transform ds DataFrame (DT-VARIABLE-VALUE)
+    into settings dataset (timestamp/row x variables/columns)"""
 
-    if 'VARIABLE' not in ds.columns or 'VARIABLE' not in ds.columns or 'VARIABLE' not in ds.columns:
+    if 'DT' not in ds.columns or 'VARIABLE' not in ds.columns or 'VALUE' not in ds.columns:
         raise ValueError('ds doesn\'t contain the right columns {}'.format(ds.columns))
 
     # get features
@@ -69,7 +69,7 @@ def get_states_flow(ds: pd.DataFrame, keep_na: bool = False, propagate: bool = T
 
 # https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases
 def time_compress(ds, freq, get_conflict=False):
-    """compress input dataframe on freq"""
+    """compress input DataFrame on freq"""
     times = ds.index.to_period(freq=freq)
     columns = ds.columns
     index = times.unique()
@@ -87,28 +87,23 @@ def time_compress(ds, freq, get_conflict=False):
         conflicts = []
         for col in ds.columns:
             data = ds.loc[times == time, col].dropna()
-            # data = ds.loc[times == time].dropna()
-
             if not data.empty:
                 # get last value
-                # print(data.unique())
                 res.loc[time, col] = data[-1]
-
                 # save conflict
                 if len(data.unique()) > 1 and get_conflict:
                     conflicts.append(col)
 
-        # show conflict matching
+        # save conflict matching
         if conflicts:
-            # print("detect conflict for: {}".format(time))
-            # print(ds.loc[times == time, conflicts].dropna())
+            # keep only conflicting columns
             conflict_map[time] = ds.loc[times == time, conflicts].dropna(how='all')
 
-        l = ds.loc[times == time, :].index
-        res.loc[time, 'ltime'] = l[0]
-        res.loc[time, 'rtime'] = l[-1]
+        # save setting insertion time window
+        tw = ds.loc[times == time, :].index
+        res.loc[time, 'ltime'] = tw[0]
+        res.loc[time, 'rtime'] = tw[-1]
 
-    # res.index = res.index.to_timestamp()
     if get_conflict:
         return res, conflict_map
 
@@ -124,7 +119,7 @@ def main():
     print('transpose dataset...')
     settings = get_states_flow(ds, propagate=True)
 
-    output_dir = 'results'
+    output_dir = '../results'
     filename = os.path.basename(args.file)
     filename = os.path.splitext(filename)[0]
     filename = os.path.join(output_dir, 'settings_' + filename + '.CSV')
@@ -133,7 +128,7 @@ def main():
 
     if args.complete:
         print('save complete setting version: {}'.format(filename))
-        settings.to_csv(filename, sep=';')
+        settings.to_csv(filename, sep=args.sep)
         return
 
     print('compress settings...')
@@ -142,7 +137,7 @@ def main():
     settings = time_compress(settings, freq='1D', get_conflict=False)
 
     print('save compressed setting version: {}'.format(filename))
-    settings.to_csv(filename, sep=';')
+    settings.to_csv(filename, sep=args.sep)
     return
 
 

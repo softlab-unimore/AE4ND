@@ -1,12 +1,12 @@
 import os
+import json
 import argparse
-import numpy as np
 import pandas as pd
 from tabulate import tabulate
 
-from scipy import stats
-
 from utils.tools import get_settings
+
+from model.OneThreshold.one_threshold import OneThreshold
 
 
 def get_arguments():
@@ -40,76 +40,41 @@ def get_arguments():
     return args
 
 
-def one_threshold(s, start, th, size, margin):
-    s = s[s.index >= start]
-
-    start = s.index.min()
-    if s.empty:
-        print('s is empty')
-        return None
-
-    if np.std(s.values) == 0:
-        print('s std is zero')
-        return None
-
-    # z-normalization on s
-    s[:] = stats.zscore(s.values)
-
-    # keep only not nan value
-    cond = np.isnan(s).any()
-
-    if cond:
-        print('nan value in series')
-        return start, start
-
-    size_support = size
-    margin_support = margin
-    time = None
-    reset = True
-
-    for idx, val in s.iteritems():
-        if reset:
-            size_support = size
-            margin_support = margin
-            time = idx
-            reset = False
-
-        if abs(val) <= th:
-            size_support -= 1
-        elif margin_support > 0:
-            size_support -= 1
-            margin_support -= 1
-        else:
-            reset = True
-
-        if size_support == 0:
-            break
-
-    return start, time
-
-
 def main():
     args = get_arguments()
+
+    # read dataset
     ds = pd.read_csv(args.file, args.sep)
     if 'DT' not in ds.columns:
         raise ValueError('file doesn\'t contain DT column for datetime index')
 
+    # set time index
     ds.set_index('DT', inplace=True)
-    ds.sort_index(inplace=True)
     ds.index = pd.to_datetime(ds.index)
+    ds.sort_index(inplace=True)
 
+    # get model params
+    with open("../params/params_one_threshold.json") as file:
+        params = json.load(file)
+
+    # define model
+    model = OneThreshold(th=params['th'], size=params['size'], margin=params['margin'])
+
+    # define the setup start
     start_time = ds.index.min()
     if args.settings:
+        # get the setup start from settings
         settings = pd.read_csv(args.settings, sep=args.sep)
         settings.set_index('DT', inplace=True)
         settings.index = pd.to_datetime(settings.index)
+
+        # convert ltime and rtime column into datetime values
         if 'ltime' in settings.columns:
             settings.ltime = pd.to_datetime(settings.ltime)
-
         if 'rtime' in settings.columns:
             settings.rtime = pd.to_datetime(settings.rtime)
 
-
+        # get setting for the given dataset
         setting = get_settings(ds, settings)
         if 'ltime' in setting:
             start_time = setting.ltime
@@ -118,9 +83,8 @@ def main():
 
     results = []
     for col in ds.columns:
-        time = one_threshold(ds[col].copy(),
-                             start=start_time,
-                             th=0.5, size=800, margin=1)
+        time = model.predict(ds[col].copy(), start=start_time)
+
         if time and time[0] != time[1]:
             results.append({'feature': col, 'start': time[0], 'end': time[1]})
 
@@ -128,7 +92,7 @@ def main():
     print(tabulate(results, headers='keys', tablefmt='psql'))
 
     if args.save:
-        output_dir = 'results'
+        output_dir = '../results'
         filename = os.path.basename(args.file)
         filename = os.path.join(output_dir, 'one_threshold_' + filename)
         if not os.path.isdir(output_dir):

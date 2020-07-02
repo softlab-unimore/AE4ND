@@ -1,11 +1,11 @@
 # SBDIO 
 
-## Requisiti
+## Requirements
 
 - Python: Python 3.*
 - Packages: requirements.txt
 
-## Prima dell'utilizzo
+## Installation
 
 ```bash
 $ cd source
@@ -19,6 +19,11 @@ $ pip install -r requirements.txt
 ```
 
 ## How to Use
+
+Inside the *model* folder, there are the models already implemented and tested in fixed use case
+
+- One Threshold
+- Setup Clustering
 
 ### One Threshold
 Tecnica base che consente di riconoscere variazioni nei dati specificando 
@@ -63,21 +68,20 @@ aggiornato online con nuove condizioni operative imparando
 nuovi pattern, e individuare outlier in qualsiasi momento.
 
 ```bash
-$ python clustering.py -h
-usage: clustering.py [-h] --test TEST --train TRAIN [--sep SEP] [--single]
-                     [--save]
+$ python demo.clustering.py -h
+usage: clustering.py [-h] --test TEST --train TRAIN [--sep SEP]
+                     [--features FEATURES [FEATURES ...]] [--save]
 
 Run "Setup Clustering Algorithm"
 
 optional arguments:
-  -h, --help     show this help message and exit
-  --test TEST    file to analyze and detect abnormal condition
-  --train TRAIN  file used to learn the normal state
-  --sep SEP      table separator
-  --single       learn normal state for each feature, or learn a general
-                 normal state for all features
-  --save         to save the final algorithm result
-
+  -h, --help            show this help message and exit
+  --test TEST           file to analyze and detect abnormal condition
+  --train TRAIN         file used to learn the normal state
+  --sep SEP             table separator to analyze input dataset
+  --features FEATURES [FEATURES ...]
+                        feature list where the algorithm is applied
+  --save                to save the final algorithm result
 ```
 
 ```bash
@@ -91,4 +95,24 @@ $python clustering.py --train data/ts_normal1.CSV --test data/ts_anomaly_setup1.
 |  2 | params_3  | 2018-01-11 21:32:32 | 2018-01-11 21:39:11 |
 |  3 | params_4  | 2018-01-11 21:19:12 | 2018-01-11 22:05:51 |
 ...
+```
+
+Algorithm params are inside the *params* folder (params/params_clustering.json)
+
+#### Tested Params
+Sliding Window
+```json
+{
+  "kernel": 200,
+  "stride": 10
+}
+```
+
+*Cosine* distance
+```json
+{
+  "distance": "cosine",
+  "max_distance": 0.001,
+  "anomaly_threshold": 0.001,
+}
 ```
