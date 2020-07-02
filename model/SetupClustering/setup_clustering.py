@@ -64,6 +64,7 @@ class SetupClustering(object):
                 self._online_clustering(X)
 
     def predict(self, X):
+        print('====== SetupClustering Predict ======')
         X = X.reshape((len(X), -1))
         y_pred = np.zeros(X.shape[0])
         for i in range(X.shape[0]):
