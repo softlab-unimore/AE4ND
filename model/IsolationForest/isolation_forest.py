@@ -65,7 +65,7 @@ class IsolationForest(object):
 
         print('====== Isolation Forest Fit ======')
         # X = X.reshape((len(X), -1))
-        self.fit(X)
+        self.model.fit(X)
 
     def predict(self, X):
         """ Predict anomalies with mined invariants
