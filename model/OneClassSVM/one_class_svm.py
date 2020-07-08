@@ -51,7 +51,7 @@ class OneClassSVM(object):
         """
 
         print('====== OneClassSVM Fit ======')
-        # X = X.reshape((len(X), -1))
+        X = X.reshape((len(X), -1))
         self.model.fit(X)
 
     def predict(self, X):
@@ -64,7 +64,7 @@ class OneClassSVM(object):
             y_pred: ndarray, the predicted label vector of shape (num_instances,)
         """
         print('====== OneClassSVM Predict ======')
-        # X = X.reshape((len(X), -1))
+        X = X.reshape((len(X), -1))
         y_pred = self.model.predict(X)
         y_pred = np.where(y_pred > 0, 0, 1)
         return y_pred

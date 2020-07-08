@@ -54,7 +54,7 @@ def main():
     ds.sort_index(inplace=True)
 
     # get model params
-    with open("../params/params_one_threshold.json") as file:
+    with open("./params/params_one_threshold.json") as file:
         params = json.load(file)
 
     # define model

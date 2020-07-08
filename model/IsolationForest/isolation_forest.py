@@ -2,7 +2,7 @@
 The implementation of IsolationForest model for anomaly detection.
 
 Authors:
-    LogPAI Team
+    scikit-learn Team
 
 Reference:
     Liu, Fei Tony, Ting, Kai Ming and Zhou, Zhi-Hua.
@@ -18,7 +18,7 @@ from sklearn.ensemble import IsolationForest as iForest
 
 class IsolationForest(object):
 
-    def __init__(self, n_estimators=100, max_samples='auto', contamination=0.03, **kwargs):
+    def __init__(self, n_estimators=100, max_samples='auto', contamination=0.03, max_features=0.5, **kwargs):
         """ The IsolationForest model for anomaly detection
         Arguments
         ---------
@@ -53,8 +53,10 @@ class IsolationForest(object):
         ---------
             For more information, please visit https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html
         """
-        self.model = iForest(n_estimators=n_estimators, max_samples=max_samples, contamination=contamination,
-                             behaviour='new', **kwargs)
+        self.model = iForest(n_estimators=n_estimators,
+                             max_samples=max_samples,
+                             contamination=contamination,
+                             max_features=max_features, **kwargs)
 
     def fit(self, X):
         """
@@ -64,7 +66,7 @@ class IsolationForest(object):
         """
 
         print('====== Isolation Forest Fit ======')
-        # X = X.reshape((len(X), -1))
+        X = X.reshape((len(X), -1))
         self.model.fit(X)
 
     def predict(self, X):
@@ -77,7 +79,7 @@ class IsolationForest(object):
             y_pred: ndarray, the predicted label vector of shape (num_instances,)
         """
         print('====== Isolation Forest Predict ======')
-        # X = X.reshape((len(X), -1))
+        X = X.reshape((len(X), -1))
         y_pred = self.model.predict(X)
         y_pred = np.where(y_pred > 0, 0, 1)
         return y_pred
