@@ -9,7 +9,7 @@ Reference:
     LOF: identifying density-based local outliers. In ACM sigmod record.
 
 """
-
+import logging
 import numpy as np
 from sklearn.neighbors import LocalOutlierFactor
 
@@ -52,7 +52,7 @@ class LOF(object):
             X: ndarray, the event count matrix of shape num_instances-by-num_events
         """
 
-        print('====== LOF Fit ======')
+        logging.info('====== LOF Fit ======')
         X = X.reshape((len(X), -1))
         self.model.fit(X)
 
@@ -65,7 +65,7 @@ class LOF(object):
         -------
             y_pred: ndarray, the predicted label vector of shape (num_instances,)
         """
-        print('====== LOF Predict ======')
+        logging.info('====== LOF Predict ======')
         X = X.reshape((len(X), -1))
         y_pred = self.model.predict(X)
         y_pred = np.where(y_pred > 0, 0, 1)

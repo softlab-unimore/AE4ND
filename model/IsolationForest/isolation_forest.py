@@ -11,7 +11,7 @@ Reference:
     Liu, Fei Tony, Ting, Kai Ming and Zhou, Zhi-Hua.
     “Isolation-based anomaly detection.” ACM Transactions on Knowledge Discovery from Data (TKDD)
     """
-
+import logging
 import numpy as np
 from sklearn.ensemble import IsolationForest as iForest
 
@@ -65,7 +65,7 @@ class IsolationForest(object):
             X: ndarray, the event count matrix of shape num_instances-by-num_events
         """
 
-        print('====== Isolation Forest Fit ======')
+        logging.info('====== Isolation Forest Fit ======')
         X = X.reshape((len(X), -1))
         self.model.fit(X)
 
@@ -78,7 +78,7 @@ class IsolationForest(object):
         -------
             y_pred: ndarray, the predicted label vector of shape (num_instances,)
         """
-        print('====== Isolation Forest Predict ======')
+        logging.info('====== Isolation Forest Predict ======')
         X = X.reshape((len(X), -1))
         y_pred = self.model.predict(X)
         y_pred = np.where(y_pred > 0, 0, 1)

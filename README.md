@@ -24,95 +24,30 @@ Inside the *model* folder, there are the models already implemented and tested i
 
 - One Threshold
 - Setup Clustering
+- Isolation Forest
+- One Class SVM
+- Local Outlier Factor (LOF)
+- PCA Anomaly Detection
 
-### One Threshold
-Tecnica base che consente di riconoscere variazioni nei dati specificando 
-l’istante temporale dell’inserimento del setting e andando a individuare 
-l’istante di tempo in cui si raggiunge la condizione di equilibrio
 
-```bash
-$ python one_threshold.py -h
-usage: one_threshold.py [-h] --file FILE [--settings SETTINGS] [--sep SEP]
-                        [--save]
-Run "One Threshold Algorithm"
+## Evaluation
 
-optional arguments:
-  -h, --help           show this help message and exit
-  --file FILE          file to analise
-  --settings SETTINGS  settings to provide the setup starting time
-  --sep SEP            table separator
-  --save               to save the final algorithm result
-```
+Univariate Time Series
 
-```bash
-python one_threshold.py --file data/ts_anomaly_setup1.CSV --settings data/settings_Ricette.CSV
+| Model           	| Accuracy 	| Precision 	| Recall 	| F-score 	|
+|-----------------	|----------	|-----------	|--------   |---------  |
+| PCA             	| 90.53     | 99.76     	| 84.10     | 91.26     |
+| SetupClustering 	| 72.06     | 83.10        	| 65.90     | 73.51     |
+| OneClassSVM      	| 58.71     | 59.11       	| 96.70     | 73.37     |
+| Isolation Forest	| 66.24     | 68.52       	| 78.80    	| 73.30     |
+| LOF             	| 58.58     | 59.06       	| 96.50    	| 73.27     |
 
-anomaly:
-+----+-----------+---------------------+---------------------+
-|    | feature   | start               | end                 |
-|----+-----------+---------------------+---------------------|
-|  0 | params_2  | 2018-01-11 21:19:12 | 2018-01-11 21:54:03 |
-|  1 | params_3  | 2018-01-11 21:19:12 | 2018-01-11 21:48:31 |
-|  2 | params_4  | 2018-01-11 21:19:12 | 2018-01-11 22:00:28 |
-...
-```
+Multivariate Time Series
 
-### Clustering
-Tecnica di estrazione di pattern dal comportamento normale del macchinario 
-per l'individuazione di anomalie sulla base dello scostamento.
-
-L’algoritmo impara pattern durante il normale funzionamento del componente, 
-di conseguenza individua le condizioni di avviamento come anomalie, senza dover indicare 
-l’inserimento del nuovo settaggio. Inoltre, il modello può essere 
-aggiornato online con nuove condizioni operative imparando 
-nuovi pattern, e individuare outlier in qualsiasi momento.
-
-```bash
-$ python demo.clustering.py -h
-usage: clustering.py [-h] --test TEST --train TRAIN [--sep SEP]
-                     [--features FEATURES [FEATURES ...]] [--save]
-
-Run "Setup Clustering Algorithm"
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --test TEST           file to analyze and detect abnormal condition
-  --train TRAIN         file used to learn the normal state
-  --sep SEP             table separator to analyze input dataset
-  --features FEATURES [FEATURES ...]
-                        feature list where the algorithm is applied
-  --save                to save the final algorithm result
-```
-
-```bash
-$python clustering.py --train data/ts_normal1.CSV --test data/ts_anomaly_setup1.CSV --single
-
-+----+-----------+---------------------+---------------------+
-|    | feature   | start               | end                 |
-|----+-----------+---------------------+---------------------|
-|  0 | params_2  | 2018-01-11 21:19:12 | 2018-01-11 22:02:31 |
-|  1 | params_3  | 2018-01-11 21:19:12 | 2018-01-11 21:22:31 |
-|  2 | params_3  | 2018-01-11 21:32:32 | 2018-01-11 21:39:11 |
-|  3 | params_4  | 2018-01-11 21:19:12 | 2018-01-11 22:05:51 |
-...
-```
-
-Algorithm params are inside the *params* folder (params/params_clustering.json)
-
-#### Tested Params
-Sliding Window
-```json
-{
-  "kernel": 200,
-  "stride": 10
-}
-```
-
-*Cosine* distance
-```json
-{
-  "distance": "cosine",
-  "max_distance": 0.001,
-  "anomaly_threshold": 0.001,
-}
-```
+| Model           	| Accuracy 	| Precision 	| Recall 	| F-score 	|
+|-----------------	|----------	|-----------	|--------   |---------  |
+| PCA             	| 100.0     | 100.0     	| 100.0     | 100.0     |
+| SetupClustering 	| 91.17     | 100.0        	| 85.00     | 91.89     |
+| OneClassSVM      	| 61.76     | 60.60       	| 100.0     | 75.47     |
+| Isolation Forest	| 83.82     | 91.42       	| 80.00    	| 85.33     |
+| LOF             	| 60.29     | 59.70       	| 100.0    	| 74.77     |

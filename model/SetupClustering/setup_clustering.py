@@ -46,7 +46,7 @@ class SetupClustering(object):
             raise ValueError('select the wrong distance metric')
 
     def fit(self, X):
-        print('====== SetupClustering Fit ======')
+        logging.info('====== SetupClustering Fit ======')
         X = X.reshape((len(X), -1))
 
         if self.mode == 'offline':
@@ -64,7 +64,7 @@ class SetupClustering(object):
                 self._online_clustering(X)
 
     def predict(self, X):
-        print('====== SetupClustering Predict ======')
+        logging.info('====== SetupClustering Predict ======')
         X = X.reshape((len(X), -1))
         y_pred = np.zeros(X.shape[0])
         for i in range(X.shape[0]):
@@ -74,13 +74,13 @@ class SetupClustering(object):
         return y_pred
 
     def _offline_clustering(self, X):
-        print('Starting offline clustering...')
+        logging.info('Starting offline clustering...')
         p_dist = pdist(X, metric=self._distance_metric)
         z = linkage(p_dist, 'complete')
         cluster_index = fcluster(z, self.max_dist, criterion='distance')
         self._extract_representatives(X, cluster_index)
-        print('Processed {} instances.'.format(X.shape[0]))
-        print('Found {} clusters offline.\n'.format(len(self.representatives)))
+        logging.info('Processed {} instances.'.format(X.shape[0]))
+        logging.info('Found {} clusters offline.\n'.format(len(self.representatives)))
 
     def _extract_representatives(self, X, cluster_index):
         num_clusters = len(set(cluster_index))
@@ -91,10 +91,10 @@ class SetupClustering(object):
             self.representatives.append(representative_center)
 
     def _online_clustering(self, X):
-        print("Starting online clustering...")
+        logging.info("Starting online clustering...")
         for i in range(self.num_bootstrap_samples, X.shape[0]):
             if (i + 1) % 2000 == 0:
-                print('Processed {} instances.'.format(i + 1))
+                logging.info('Processed {} instances.'.format(i + 1))
 
             instance_vec = X[i, :]
             if len(self.representatives) > 0:
@@ -107,8 +107,8 @@ class SetupClustering(object):
                     continue
             self.cluster_size_dict[len(self.representatives)] = 1
             self.representatives.append(instance_vec)
-        print('Processed {} instances.'.format(X.shape[0]))
-        print('Found {} clusters online.\n'.format(len(self.representatives)))
+        logging.info('Processed {} instances.'.format(X.shape[0]))
+        logging.info('Found {} clusters online.\n'.format(len(self.representatives)))
 
     def save_model(self, filename: str):
         try:

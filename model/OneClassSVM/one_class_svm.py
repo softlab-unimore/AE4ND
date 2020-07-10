@@ -8,7 +8,7 @@ Reference:
     https://scikit-learn.org/stable/modules/generated/sklearn.svm.OneClassSVM.html
     https://scikit-learn.org/stable/auto_examples/svm/plot_oneclass.html#sphx-glr-auto-examples-svm-plot-oneclass-py
 """
-
+import logging
 import numpy as np
 from sklearn.svm import OneClassSVM as SVM
 
@@ -50,7 +50,7 @@ class OneClassSVM(object):
             X: ndarray, the event count matrix of shape num_instances-by-num_events
         """
 
-        print('====== OneClassSVM Fit ======')
+        logging.info('====== OneClassSVM Fit ======')
         X = X.reshape((len(X), -1))
         self.model.fit(X)
 
@@ -63,7 +63,7 @@ class OneClassSVM(object):
         -------
             y_pred: ndarray, the predicted label vector of shape (num_instances,)
         """
-        print('====== OneClassSVM Predict ======')
+        logging.info('====== OneClassSVM Predict ======')
         X = X.reshape((len(X), -1))
         y_pred = self.model.predict(X)
         y_pred = np.where(y_pred > 0, 0, 1)
