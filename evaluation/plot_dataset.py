@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from utils.tools import get_time_series_dataset
 
 show_setup = False
-show_filename = True
+show_filename = False
 show_setting = '-1'
 
 
@@ -29,11 +29,6 @@ def plot_file(filename, title=''):
 #     '56', '57', '58', '62', '63', '64', '67', '69'
 # ]
 
-"""
-/Users/delbu/Projects/Notebooks/PHM/Dataset/Dataset_1/LOG1HZ\File (1).CSV
-/Users/delbu/Projects/Notebooks/PHM/Dataset/Dataset_1/LOG1HZ\File (10).CSV
-/Users/delbu/Projects/Notebooks/PHM/Dataset/Dataset_1/LOG1HZ\File (3).CSV
-"""
 filename = '/Users/delbu/Projects/Notebooks/PHM/Dataset/Dataset_1/LOG1HZ\File (35).CSV'
 
 if show_filename:

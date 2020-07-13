@@ -87,7 +87,7 @@ def get_time_series_dataset(filename: str, sep: str, col: str):
     """get time series dataframe dataset"""
     # Get DataFrame from filename
     try:
-        ds = pd.read_csv(filename, sep=sep)
+        ds = pd.read_csv(filename, sep=sep, encoding='latin1')
     except (pd.errors.ParserError, FileNotFoundError):
         return None
 
