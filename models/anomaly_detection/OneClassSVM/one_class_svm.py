@@ -1,5 +1,5 @@
 """
-The implementation of One Class SVM model for unsupervised outlier detection.
+The implementation of One Class SVM models for unsupervised outlier detection.
 
 Authors:
     scikit-learn Team

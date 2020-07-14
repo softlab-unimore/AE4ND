@@ -6,7 +6,7 @@ from tabulate import tabulate
 
 from utils.tools import get_settings
 
-from model.anomaly_detection.OneThreshold.one_threshold import OneThreshold
+from models.anomaly_detection.OneThreshold.one_threshold import OneThreshold
 
 
 def get_arguments():
@@ -53,11 +53,11 @@ def main():
     ds.index = pd.to_datetime(ds.index)
     ds.sort_index(inplace=True)
 
-    # get model params
+    # get models params
     with open("./params/params_one_threshold.json") as file:
         params = json.load(file)
 
-    # define model
+    # define models
     model = OneThreshold(th=params['th'], size=params['size'], margin=params['margin'])
 
     # define the setup start

@@ -4,11 +4,11 @@ import pandas as pd
 from utils.tools import get_files, get_time_series_dataset, get_sliding_window_matrix, \
     get_settings, check_setup, lazy_check_setup, label_settings
 
-from model.anomaly_detection.SetupClustering import SetupClustering
-from model.anomaly_detection.IsolationForest.isolation_forest import IsolationForest
-from model.anomaly_detection.OneClassSVM import OneClassSVM
-from model.anomaly_detection.LOF.local_outlier_factor import LOF
-from model.anomaly_detection.PCA import PCA
+from models.anomaly_detection.SetupClustering import SetupClustering
+from models.anomaly_detection.IsolationForest.isolation_forest import IsolationForest
+from models.anomaly_detection.OneClassSVM import OneClassSVM
+from models.anomaly_detection.LOF.local_outlier_factor import LOF
+from models.anomaly_detection.PCA import PCA
 
 # Input folders
 global_dir = '/Users/delbu/Projects/Notebooks/PHM/Dataset/Dataset_1/LOG1HZ'
@@ -108,7 +108,7 @@ def main():
     # with open('../results/setup_files.json', 'w') as outfile:
     #     json.dump(setup_files, outfile)
 
-    # For each state we train a model with a "normal" file and predict anomalies
+    # For each state we train a models with a "normal" file and predict anomalies
     print('\nTraining and Testing - {}'.format(model_type))
     for k, val in settings_map.items():
         print('\nState {} has {} files'.format(k, len(val)))
@@ -139,7 +139,7 @@ def main():
             x_train = ds_train[[col]]
             x_train = get_sliding_window_matrix(x_train.values, kernel, stride)
 
-            # Selected model
+            # Selected models
             if model_type == 'pca':
                 model = PCA(n_components=0.95, threshold=100, c_alpha=3.2905)
             elif model_type == 'clustering':
@@ -151,7 +151,7 @@ def main():
             elif model_type == 'if':
                 model = IsolationForest(n_estimators=200, max_samples=512, contamination=0.0003, max_features=0.8)
             else:
-                print("Select the wrong model")
+                print("Select the wrong models")
                 return
 
             # Training

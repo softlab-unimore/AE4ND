@@ -5,7 +5,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from tabulate import tabulate
-from model.anomaly_detection.SetupClustering import SetupClustering
+from models.anomaly_detection.SetupClustering import SetupClustering
 from utils.tools import create_triplet_time_series, get_time_series_dataset, get_sliding_window_matrix
 
 
@@ -60,7 +60,7 @@ def main():
     if ds_test is None:
         raise ValueError('Impossible read test file')
 
-    # Get model params
+    # Get models params
     print('Get params')
     try:
         with open("./params/params_clustering.json") as file:
@@ -97,17 +97,17 @@ def main():
     print("Training...")
     model.fit(x_train)
 
-    # Option 1: save trained model
-    # Save trained model
-    # joblib.dump(model, 'results/model.pkl')
-    # Load trained model
-    # model = joblib.load('results/model.pkl')
+    # Option 1: save trained models
+    # Save trained models
+    # joblib.dump(models, 'results/models.pkl')
+    # Load trained models
+    # models = joblib.load('results/models.pkl')
 
-    # Option 2: save model state
-    # res = model.save_model(filename='results/data.pkl')
+    # Option 2: save models state
+    # res = models.save_model(filename='results/data.pkl')
     # if not res:
-    #     raise ValueError('Impossible save model internal state')
-    # model.load_model(filename='results/data.pkl')
+    #     raise ValueError('Impossible save models internal state')
+    # models.load_model(filename='results/data.pkl')
 
     # Create test set
     print("Create testing set")

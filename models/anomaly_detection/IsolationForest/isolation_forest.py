@@ -1,5 +1,5 @@
 """
-The implementation of IsolationForest model for anomaly detection.
+The implementation of IsolationForest models for anomaly detection.
 
 Authors:
     scikit-learn Team
@@ -19,7 +19,7 @@ from sklearn.ensemble import IsolationForest as iForest
 class IsolationForest(object):
 
     def __init__(self, n_estimators=100, max_samples='auto', contamination=0.03, max_features=0.5, **kwargs):
-        """ The IsolationForest model for anomaly detection
+        """ The IsolationForest models for anomaly detection
         Arguments
         ---------
             n_estimators : int, optional (default=100). The number of base estimators in the ensemble.

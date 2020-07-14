@@ -5,7 +5,7 @@ import pandas as pd
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 
-from model.anomaly_detection.OneClassSVM import OneClassSVM
+from models.anomaly_detection.OneClassSVM import OneClassSVM
 from utils.tools import create_triplet_time_series, get_time_series_dataset, get_sliding_window_matrix
 
 # Input files
@@ -92,17 +92,17 @@ def main():
     print("Training...")
     model.fit(x_train)
 
-    # Option 1: Save trained model
+    # Option 1: Save trained models
     if save_model:
         # Create output directory
-        filename = os.path.join(output_dir, 'model.pkl')
+        filename = os.path.join(output_dir, 'models.pkl')
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir, exist_ok=True)
 
-        # Save trained model
+        # Save trained models
         joblib.dump(model, filename)
 
-        # Load trained model
+        # Load trained models
         model = joblib.load(filename)
 
     # Create test set

@@ -1,5 +1,5 @@
 """
-The implementation of PCA model for anomaly detection.
+The implementation of PCA models for anomaly detection.
 Authors:
     LogPAI Team
 Reference:
@@ -15,7 +15,7 @@ import logging
 class PCA(object):
 
     def __init__(self, n_components=0.95, threshold=None, c_alpha=3.2905):
-        """ The PCA model for anomaly detection
+        """ The PCA models for anomaly detection
         Attributes
         ----------
             proj_C: The projection matrix for projecting feature vector to abnormal space
@@ -86,7 +86,7 @@ class PCA(object):
     def predict(self, X):
         logging.info('====== PCA Predict ======')
         X = X.reshape((len(X), -1))
-        assert self.proj_C is not None  # PCA model needs to be trained before prediction.
+        assert self.proj_C is not None  # PCA models needs to be trained before prediction.
         y_pred = np.zeros(X.shape[0])
         for i in range(X.shape[0]):
             y_a = np.dot(self.proj_C, X[i, :])
