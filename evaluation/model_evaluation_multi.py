@@ -1,15 +1,14 @@
-import json
 import numpy as np
 import pandas as pd
 
 from utils.tools import get_files, get_time_series_dataset, get_sliding_window_matrix, \
     get_settings, check_setup, lazy_check_setup, label_settings
 
-from model.SetupClustering.setup_clustering import SetupClustering
-from model.IsolationForest.isolation_forest import IsolationForest
-from model.OneClassSVM.one_class_svm import OneClassSVM
-from model.LOF.local_outlier_factor import LOF
-from model.PCA.pca import PCA
+from model.anomaly_detection.SetupClustering import SetupClustering
+from model.anomaly_detection.IsolationForest.isolation_forest import IsolationForest
+from model.anomaly_detection.OneClassSVM import OneClassSVM
+from model.anomaly_detection.LOF.local_outlier_factor import LOF
+from model.anomaly_detection.PCA import PCA
 
 # Input folders
 global_dir = '/Users/delbu/Projects/Notebooks/PHM/Dataset/Dataset_1/LOG1HZ'

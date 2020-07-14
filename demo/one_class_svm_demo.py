@@ -5,7 +5,7 @@ import pandas as pd
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 
-from model.OneClassSVM.one_class_svm import OneClassSVM
+from model.anomaly_detection.OneClassSVM import OneClassSVM
 from utils.tools import create_triplet_time_series, get_time_series_dataset, get_sliding_window_matrix
 
 # Input files

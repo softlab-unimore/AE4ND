@@ -1,12 +1,11 @@
 import os
 import json
-import joblib
 import argparse
 
 import numpy as np
 import pandas as pd
 from tabulate import tabulate
-from model.SetupClustering.setup_clustering import SetupClustering
+from model.anomaly_detection.SetupClustering import SetupClustering
 from utils.tools import create_triplet_time_series, get_time_series_dataset, get_sliding_window_matrix
 
 

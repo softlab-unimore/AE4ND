@@ -6,7 +6,7 @@ from tabulate import tabulate
 
 from utils.tools import get_settings
 
-from model.OneThreshold.one_threshold import OneThreshold
+from model.anomaly_detection.OneThreshold.one_threshold import OneThreshold
 
 
 def get_arguments():
