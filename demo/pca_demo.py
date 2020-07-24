@@ -5,7 +5,7 @@ import pandas as pd
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 
-from models.anomaly_detection.PCA import PCA
+from models.anomaly_detection.PCA.pca import PCA
 from utils.tools import create_triplet_time_series, get_time_series_dataset, get_sliding_window_matrix
 
 # Input files

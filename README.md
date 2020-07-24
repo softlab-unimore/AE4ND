@@ -20,7 +20,7 @@ $ pip install -r requirements.txt
 
 ## How to Use
 
-Inside the *model* folder, there are the models already implemented and tested in fixed use case
+Inside the *models* folder, there are the models already implemented and tested in fixed use case
 
 - One Threshold
 - Setup Clustering

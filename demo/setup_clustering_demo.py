@@ -5,7 +5,7 @@ import pandas as pd
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 
-from models.anomaly_detection.SetupClustering import SetupClustering
+from models.anomaly_detection.SetupClustering.setup_clustering import SetupClustering
 from utils.tools import create_triplet_time_series, get_time_series_dataset, get_sliding_window_matrix
 
 # Input files

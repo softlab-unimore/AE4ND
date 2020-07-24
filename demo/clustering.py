@@ -5,7 +5,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from tabulate import tabulate
-from models.anomaly_detection.SetupClustering import SetupClustering
+from models.anomaly_detection.SetupClustering.setup_clustering import SetupClustering
 from utils.tools import create_triplet_time_series, get_time_series_dataset, get_sliding_window_matrix
 
 
@@ -135,7 +135,7 @@ def main():
 
     # Save results
     if args.save:
-        output_dir = '../results'
+        output_dir = './results'
         filename = os.path.basename(args.test)
         filename = os.path.join(output_dir, 'clustering_' + filename)
         if not os.path.isdir(output_dir):

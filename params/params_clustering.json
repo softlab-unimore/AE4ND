@@ -2,7 +2,7 @@
   "name": "clustering",
   "version": "1.0.0",
   "distance": "cosine",
-  "max_distance": 0.001,
+  "max_distance": 0.0001,
   "anomaly_threshold": 0.0001,
   "kernel": 200,
   "stride": 10
