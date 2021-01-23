@@ -1,15 +1,5 @@
-import os
 import numpy as np
 import pandas as pd
-
-
-def get_files(dir_name, ext='CSV'):
-    """get file list in the given folder"""
-    files = []
-    for file in os.listdir(dir_name):
-        if file.endswith(ext):
-            files.append(os.path.join(dir_name, file))
-    return files
 
 
 def label_settings(settings, columns):
@@ -63,20 +53,29 @@ def lazy_check_setup(ds, setting):
     return False
 
 
-def create_triplet_time_series(ts: pd.Series):
-    """create triplet time series encoding"""
+def create_triplet_time_series(ts: pd.Series, with_support: bool = False):
+    """
+    create triplet time series encoding
+    withSupport if return the number of compressed records
+    """
     res = []
     start = None
     prev = None
+    support = 0
     for k, val in ts.iteritems():
+        support += 1
         if start is None and val > 0:
             start = k
+            support = 0
         elif start and val == 0:
-            res.append({
+            x = {
                 'feature': ts.name,
                 'start': start,
                 'end': prev
-            })
+            }
+            if with_support:
+                x['support'] = support
+            res.append(x)
             start = None
 
         prev = k
