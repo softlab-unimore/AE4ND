@@ -12,20 +12,19 @@ from fastdtw import fastdtw
 
 class SetupClustering(object):
 
-    def __init__(self, max_dist=0.3, anomaly_threshold=0.3, distance='cosine',
-                 mode='online',
-                 num_bootstrap_samples=1000):
+    def __init__(self, max_distance=0.3, anomaly_threshold=0.3, distance='cosine',
+                 mode='online', num_bootstrap_samples=5000):
         """
         Attributes
         ----------
-            max_dist: float, the threshold to stop the clustering process
+            max_distance: float, the threshold to stop the clustering process
             anomaly_threshold: float, the threshold for anomaly detection
             mode: str, 'offline' or 'online' mode for clustering
             num_bootstrap_samples: int, online clustering starts with a bootstraping process, which
                 determines the initial cluster representatives offline using a subset of samples
         """
 
-        self.max_dist = max_dist
+        self.max_dist = max_distance
         self.anomaly_threshold = anomaly_threshold
         self.distance = self._get_distance_metric(distance)
         self.mode = mode
@@ -46,7 +45,8 @@ class SetupClustering(object):
             raise ValueError('select the wrong distance metric')
 
     def fit(self, X):
-        logging.info('====== SetupClustering Fit ======')
+        print('SetupClustering Fit')
+        print('Distance Measure: ', self.distance)
         X = X.reshape((len(X), -1))
 
         if self.mode == 'offline':
@@ -64,7 +64,7 @@ class SetupClustering(object):
                 self._online_clustering(X)
 
     def predict(self, X):
-        logging.info('====== SetupClustering Predict ======')
+        print('SetupClustering Predict')
         X = X.reshape((len(X), -1))
         y_pred = np.zeros(X.shape[0])
         for i in range(X.shape[0]):
@@ -74,13 +74,13 @@ class SetupClustering(object):
         return y_pred
 
     def _offline_clustering(self, X):
-        logging.info('Starting offline clustering...')
+        print('Starting offline clustering...')
         p_dist = pdist(X, metric=self._distance_metric)
         z = linkage(p_dist, 'complete')
         cluster_index = fcluster(z, self.max_dist, criterion='distance')
         self._extract_representatives(X, cluster_index)
-        logging.info('Processed {} instances.'.format(X.shape[0]))
-        logging.info('Found {} clusters offline.\n'.format(len(self.representatives)))
+        print('Processed {} instances.'.format(X.shape[0]))
+        print('Found {} clusters offline.\n'.format(len(self.representatives)))
 
     def _extract_representatives(self, X, cluster_index):
         num_clusters = len(set(cluster_index))
@@ -91,10 +91,10 @@ class SetupClustering(object):
             self.representatives.append(representative_center)
 
     def _online_clustering(self, X):
-        logging.info("Starting online clustering...")
+        print("Starting online clustering...")
         for i in range(self.num_bootstrap_samples, X.shape[0]):
             if (i + 1) % 2000 == 0:
-                logging.info('Processed {} instances.'.format(i + 1))
+                print('Processed {} instances.'.format(i + 1))
 
             instance_vec = X[i, :]
             if len(self.representatives) > 0:
@@ -107,8 +107,8 @@ class SetupClustering(object):
                     continue
             self.cluster_size_dict[len(self.representatives)] = 1
             self.representatives.append(instance_vec)
-        logging.info('Processed {} instances.'.format(X.shape[0]))
-        logging.info('Found {} clusters online.\n'.format(len(self.representatives)))
+        print('Processed {} instances.'.format(X.shape[0]))
+        print('Found {} clusters online.\n'.format(len(self.representatives)))
 
     def save_model(self, filename: str):
         try:

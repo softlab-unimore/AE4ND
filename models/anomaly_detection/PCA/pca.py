@@ -12,6 +12,7 @@ Reference:
 import numpy as np
 import logging
 
+
 class PCA(object):
 
     def __init__(self, n_components=0.95, threshold=None, c_alpha=3.2905):
@@ -48,7 +49,7 @@ class PCA(object):
             X: ndarray, the event count matrix of shape num_instances-by-num_events
         """
 
-        logging.info('====== PCA summary ======')
+        print('PCA Fit ')
         X = X.reshape((len(X), -1))
         num_instances, num_events = X.shape
         X_cov = np.dot(X.T, X) / float(num_instances)
@@ -67,8 +68,8 @@ class PCA(object):
         I = np.identity(num_events, int)
         self.components = P
         self.proj_C = I - np.dot(P, P.T)
-        logging.info('n_components: {}'.format(n_components))
-        logging.info('Project matrix shape: {}-by-{}'.format(self.proj_C.shape[0], self.proj_C.shape[1]))
+        print('n_components: {}'.format(n_components))
+        print('Project matrix shape: {}-by-{}'.format(self.proj_C.shape[0], self.proj_C.shape[1]))
 
         if not self.threshold:
             # Calculate threshold using Q-statistic. Information can be found at:
@@ -81,10 +82,10 @@ class PCA(object):
             self.threshold = phi[0] * np.power(self.c_alpha * np.sqrt(2 * phi[1] * h0 * h0) / phi[0]
                                                + 1.0 + phi[1] * h0 * (h0 - 1) / (phi[0] * phi[0]),
                                                1.0 / h0)
-        logging.info('SPE threshold: {}\n'.format(self.threshold))
+        print('SPE threshold: {}\n'.format(self.threshold))
 
     def predict(self, X):
-        logging.info('====== PCA Predict ======')
+        print('PCA Predict')
         X = X.reshape((len(X), -1))
         assert self.proj_C is not None  # PCA models needs to be trained before prediction.
         y_pred = np.zeros(X.shape[0])

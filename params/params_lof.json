@@ -1,0 +1,6 @@
+{
+  "n_neighbors": 50,
+  "algorithm": "auto",
+  "metric": "minkowski",
+  "contamination": "auto"
+}

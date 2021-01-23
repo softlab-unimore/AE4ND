@@ -1,0 +1,6 @@
+{
+  "nu": 0.001,
+  "tol": 0.001,
+  "kernel": "rbf",
+  "gamma": "scale"
+}
