@@ -2,10 +2,10 @@
 The implementation of CNN AutoEncoder models for anomaly detection.
 """
 import numpy as np
-import pandas as pd
+# import pandas as pd
 from tensorflow import keras
 from tensorflow.keras import layers
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 class CNNAutoEncoder(object):
@@ -48,7 +48,7 @@ class CNNAutoEncoder(object):
             ]
         )
         model.compile(optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate), loss=self.loss)
-        model.summary()
+        # model.summary()
 
         self.model = model
 
@@ -72,7 +72,7 @@ class CNNAutoEncoder(object):
         # Get reconstruction loss threshold.
         threshold = np.max(train_mae_loss)
         print("Reconstruction error threshold: ", threshold)
-        self.threshold = threshold
+        self.threshold = np.max(threshold, self.threshold)
 
     def fit(self, x):
         print('CNN AutoEncoder Fit')
@@ -81,11 +81,11 @@ class CNNAutoEncoder(object):
 
         history = self.model.fit(
             x=x, y=x,
-            epochs=50,
+            epochs=100,
             batch_size=128,
             validation_split=0.1,
             callbacks=[
-                keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, mode="min")
+                keras.callbacks.EarlyStopping(monitor="val_loss", patience=20, mode="min")
             ],
         )
         self.history = history
@@ -96,6 +96,19 @@ class CNNAutoEncoder(object):
         # plt.show()
 
         self._set_reconstruction_error(x)
+
+    def tune(self, new_x):
+        self.model.fit(
+            x=new_x, y=new_x,
+            epochs=50,
+            batch_size=128,
+            validation_split=0.1,
+            callbacks=[
+                keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, mode="min")
+            ],
+        )
+
+        self._set_reconstruction_error(new_x)
 
     def predict(self, x):
         print('CNN AutoEncoder Predict')

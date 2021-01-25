@@ -59,15 +59,15 @@ def create_triplet_time_series(ts: pd.Series, with_support: bool = False):
     withSupport if return the number of compressed records
     """
     res = []
-    start = None
-    prev = None
+    start = -1
+    prev = -1
     support = 0
     for k, val in ts.iteritems():
         support += 1
-        if start is None and val > 0:
+        if start == -1 and val > 0:
             start = k
             support = 0
-        elif start and val == 0:
+        elif start > 0 and val == 0:
             x = {
                 'feature': ts.name,
                 'start': start,
@@ -76,9 +76,20 @@ def create_triplet_time_series(ts: pd.Series, with_support: bool = False):
             if with_support:
                 x['support'] = support
             res.append(x)
-            start = None
+            start = -1
 
         prev = k
+
+    if start != -1:
+        x = {
+            'feature': ts.name,
+            'start': start,
+            'end': prev
+        }
+        if with_support:
+            x['support'] = support
+        res.append(x)
+
     return res
 
 

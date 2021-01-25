@@ -7,10 +7,13 @@ from utils.manage_file import get_files, read_ds_lvm
 from utils.tools import create_triplet_time_series, get_sliding_window_matrix
 
 # Input files
-train_file = r'data/simulation/testaccelerometri_2.lvm'
-test_file = r'data/simulation/testaccelerometri_3.lvm'
-test_file = r'data/simulation/testaccelerometri_3.lvm'
-# new_state_folder = ''
+# train_file = r'data/simulation/testaccelerometri_2.lvm'
+# test_file = r'data/simulation/testaccelerometri_3.lvm'
+
+train_file = r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 2\testaccelerometri(2).lvm'
+test_file = r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 4\testaccelerometri_2.lvm'
+# testaccelerometri_1.lvm
+
 
 # Features
 features_list = [
@@ -23,7 +26,7 @@ features_list = [
 kernel = 288
 stride = 77
 
-num_sample = 500000
+num_sample = 1000000
 
 # max_test_step = 5000
 

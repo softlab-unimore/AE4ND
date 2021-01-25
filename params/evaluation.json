@@ -1,0 +1,28 @@
+{
+  "all_state_folder": [
+    "/Users/delbu/Projects/Dataset/Anomaly Detection/TEST 2",
+    "/Users/delbu/Projects/Dataset/Anomaly Detection/TEST 3",
+    "/Users/delbu/Projects/Dataset/Anomaly Detection/TEST 4",
+    "/Users/delbu/Projects/Dataset/Anomaly Detection/TEST 6 fail motore"
+  ],
+
+  "features_list": [
+    "Acceleration_X1",
+    "Acceleration_Y1",
+    "Acceleration_Z1",
+    "Acceleration_X2",
+    "Acceleration_Y2",
+    "Acceleration_Z2",
+    "Acceleration_X3",
+    "Acceleration_Y3",
+    "Acceleration_Z3"
+  ],
+  "kernel": 288,
+  "stride": 77,
+
+  "train_step": 5,
+  "test_step": 5,
+
+  "model_type":  "cnn"
+
+}

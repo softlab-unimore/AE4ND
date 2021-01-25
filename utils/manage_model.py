@@ -17,7 +17,7 @@ from utils.tools import get_sliding_window_matrix
 def get_model(model_type, params_file=None):
     # Get models params
     # print('Get params')
-    if params_file is  None or not os.path.isfile(params_file):
+    if params_file is None or not os.path.isfile(params_file):
         print('No provided params')
         params = {}
     else:
