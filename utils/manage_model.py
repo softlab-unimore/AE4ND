@@ -31,7 +31,7 @@ def get_model(model_type, params_file=None):
     # Model initialization
     # print("Model initialization")
     if model_type == 'isolation_forest':
-        model = IsolationForest(verbose=True, n_jobs=-1, **params)
+        model = IsolationForest(verbose=True, n_jobs=2, **params)
     elif model_type == 'setup_clustering':
         model = SetupClustering(**params)
     elif model_type == 'pca':
