@@ -18,7 +18,7 @@
     "Acceleration_Z3"
   ],
   "kernel": 288,
-  "stride": 77,
-
+  "stride": 1,
+  "with_decision_score":  true,
   "model_type":  "cnn"
 }

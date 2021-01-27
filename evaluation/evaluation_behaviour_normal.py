@@ -1,6 +1,7 @@
 import os
 import json
 import argparse
+import numpy as np
 import pandas as pd
 
 from utils.manage_model import get_model, predict_anomaly
@@ -76,6 +77,7 @@ def main():
     kernel = params['kernel']
     stride = params['stride']
     model_type = params['model_type']
+    with_decision_score = params['with_decision_score']
 
     resample_rate = 6400  # 12800 sample are 1 second
     # num_sample = 1000000
@@ -104,7 +106,7 @@ def main():
 
     # Get files from selected folder to use for training and testing
     curr_files = []
-    for folder in all_state_folder:
+    for folder in all_state_folder[1:2]:
         curr_files += get_files(folder, ext='lvm')[:5]
 
     test_files = curr_files
@@ -170,34 +172,36 @@ def main():
             print('Test Original File Length: ', test_len)
             print('New File Length {} {:.02f}'.format(len(ds_test), 100 * len(ds_test) / test_len))
 
+            if with_skip:
+                test_stride = kernel
+            else:
+                test_stride = 1
+
+            # Create set
+            print("Create testing set")
+            x_test = get_sliding_window_matrix(ds_test.values, kernel, test_stride)
+            print('Test shape ', x_test.shape)
+
             # Testing
-            y_pred = predict_anomaly(ds_test, model, kernel, with_skip=with_skip)
+            print('Testing...')
+            if with_decision_score:
+                y_pred = model.decision_score(x_test)
+            else:
+                y_pred = model.predict(x_test)
 
-            # Encoding results into triplet formats
-            results = create_triplet_time_series(y_pred, with_support=True)
+            num_error = np.sum(y_pred > 0)
+            mean_error = np.mean(y_pred)
+            if num_error > 0:
+                mean_only_error = np.mean(y_pred[y_pred > 0])
+            else:
+                mean_only_error = 0
 
-            # Show results
-            results = pd.DataFrame(results)
-
-            # Get test stride
-            test_stride = kernel if with_skip else 1
-            # Number of test samples of kernel length
-            test_sample = int((len(ds_test) - kernel) / test_stride) + 1
-
-            if results.empty:
-                tot, pct_tot, tot_sample = 0, 0, 0
+            if not np.sum(y_pred > 0):
                 print("Results: NO Anomaly founded")
             else:
-                # Number of single anomaly point
-                tot = results['support'].sum()
-                pct_tot = 100 * tot / (test_sample * test_stride)
-                print("Results: {} (record {:.02f})".format(tot, pct_tot))
-
-                # Number of anomaly sample
-                tot_sample = int(tot / test_stride)
-
-                if with_skip:
-                    print("Anomaly Sample: {} (test sample {:.02f})".format(int(tot_sample), test_sample))
+                print("Results: {} anomalies "
+                      "({:.05f} {:.05f} total {})".format(
+                    num_error, mean_error, mean_only_error, len(x_test)))
 
             result_record = {
                 'MODEL': model_type,
@@ -209,13 +213,61 @@ def main():
                 'TEST_STATE': test_state,
                 'TEST': os.path.basename(test_file),
                 'TEST_LEN': test_len,
-                'NUM_SINGLE_ANOMALY': tot,
-                'PCT_ANOMALY': pct_tot,
-                'NUM_SAMPLE_ANOMALY': tot_sample,
-                'NUM_SAMPLE': test_sample,
+                'NUM_SINGLE_ANOMALY': num_error,
+                'PCT_ANOMALY': mean_error,
+                'NUM_SAMPLE_ANOMALY': mean_only_error,
+                'NUM_SAMPLE': len(x_test),
             }
 
             result_array.append(result_record)
+
+
+            # # Testing
+            # y_pred = predict_anomaly(ds_test, model, kernel, with_skip=with_skip)
+            #
+            # # Encoding results into triplet formats
+            # results = create_triplet_time_series(y_pred, with_support=True)
+            #
+            # # Show results
+            # results = pd.DataFrame(results)
+            #
+            # # Get test stride
+            # test_stride = kernel if with_skip else 1
+            # # Number of test samples of kernel length
+            # test_sample = int((len(ds_test) - kernel) / test_stride) + 1
+            #
+            # if results.empty:
+            #     tot, pct_tot, tot_sample = 0, 0, 0
+            #     print("Results: NO Anomaly founded")
+            # else:
+            #     # Number of single anomaly point
+            #     tot = results['support'].sum()
+            #     pct_tot = 100 * tot / (test_sample * test_stride)
+            #     print("Results: {} (record {:.02f})".format(tot, pct_tot))
+            #
+            #     # Number of anomaly sample
+            #     tot_sample = int(tot / test_stride)
+            #
+            #     if with_skip:
+            #         print("Anomaly Sample: {} (test sample {:.02f})".format(int(tot_sample), test_sample))
+            #
+            # result_record = {
+            #     'MODEL': model_type,
+            #     'KERNEL': kernel,
+            #     'STRIDE': stride,
+            #     'TRAIN_STATE': train_state,
+            #     'TRAIN': os.path.basename(train_file),
+            #     'TRAIN_SIZE': train_len,
+            #     'TEST_STATE': test_state,
+            #     'TEST': os.path.basename(test_file),
+            #     'TEST_LEN': test_len,
+            #     'NUM_SINGLE_ANOMALY': tot,
+            #     'PCT_ANOMALY': pct_tot,
+            #     'NUM_SAMPLE_ANOMALY': tot_sample,
+            #     'NUM_SAMPLE': test_sample,
+            # }
+            #
+            # result_array.append(result_record)
 
     if save_result:
         if not os.path.isdir(output_dir):

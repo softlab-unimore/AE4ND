@@ -84,7 +84,7 @@ class CNNAutoEncoder(object):
             epochs=100,
             batch_size=128,
             validation_split=0.1,
-            verbose=2,
+            verbose=0,
             callbacks=[
                 keras.callbacks.EarlyStopping(monitor="val_loss", patience=20, mode="min")
             ],
@@ -123,3 +123,19 @@ class CNNAutoEncoder(object):
         # print("Indices of anomaly samples: ", np.where(anomalies))
 
         return anomalies
+
+    def decision_score(self, x):
+        print('CNN AutoEncoder Decision Score')
+        x_pred = self.model.predict(x)
+
+        test_mae_loss = self._compute_reconstruction_error(x, x_pred)
+
+        # Detect all the samples which are anomalies.
+        scores = test_mae_loss - self.threshold
+        print("Number of anomaly samples: ", np.sum(scores > 0))
+
+        print("Mean reconstruction error: {:.05f}".format(np.mean(test_mae_loss)))
+        print("Mean distance from threshold: {:.05f}".format(np.mean(scores)))
+
+        return scores
+

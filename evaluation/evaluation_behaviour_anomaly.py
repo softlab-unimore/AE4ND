@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import pandas as pd
 
 from utils.manage_model import get_model, predict_anomaly
@@ -34,6 +35,7 @@ params_file = './params/params_{}.json'.format(model_type)
 
 # Type of test
 with_skip = False
+with_decision_score = True
 
 
 def main():
@@ -89,33 +91,64 @@ def main():
     ds_test = ds_test[features_list]
 
     # Testing
-    y_pred = predict_anomaly(ds_test, model, kernel, with_skip=with_skip)
+    # y_pred = predict_anomaly(ds_test, model, kernel, with_skip=with_skip)
 
-    # Encoding results into triplet formats
-    results = create_triplet_time_series(y_pred, with_support=True)
+    if with_skip:
+        test_stride = kernel
+    else:
+        test_stride = 1
 
-    # Show results
-    results = pd.DataFrame(results)
-    if results.empty:
+    # Create set
+    print("Create testing set")
+    x_test = get_sliding_window_matrix(ds_test.values, kernel, test_stride)
+    print('Test shape ', x_test.shape)
+
+    # Testing
+    print('Testing...')
+    if with_decision_score:
+        y_pred = model.decision_score(x_test)
+    else:
+        y_pred = model.predict(x_test)
+
+    num_error = np.sum(y_pred > 0)
+    mean_error = np.mean(y_pred)
+    if num_error > 0:
+        mean_only_error = np.mean(y_pred[y_pred > 0])
+    else:
+        mean_only_error = 0
+
+    if not np.sum(y_pred > 0):
         print("Results: NO Anomaly founded")
     else:
-        # print(tabulate(results, headers='keys', tablefmt='psql'))
+        print("Results: {} anomalies "
+              "({:.05f} {:.05f} total {})".format(
+            num_error, mean_error, mean_only_error, len(x_test)))
 
-        test_stride = kernel if with_skip else 1
-
-        # Number of test samples of kernel length
-        test_sample = int((len(ds_test) - kernel) / test_stride) + 1
-
-        # Number of single anomaly point
-        tot = results['support'].sum()
-        pct_tot = 100 * tot / (test_sample * test_stride)
-
-        print("Results: {} (record {:.02f})".format(tot, pct_tot))
-
-        if with_skip:
-            # Number of anomaly sample
-            tot_sample = int(tot / test_stride)
-            print("Anomaly Sample: {} (test sample {:.02f})".format(int(tot_sample), test_sample))
+    # Encoding results into triplet formats
+    # results = create_triplet_time_series(y_pred, with_support=True)
+    #
+    # # Show results
+    # results = pd.DataFrame(results)
+    # if results.empty:
+    #     print("Results: NO Anomaly founded")
+    # else:
+    #     # print(tabulate(results, headers='keys', tablefmt='psql'))
+    #
+    #     test_stride = kernel if with_skip else 1
+    #
+    #     # Number of test samples of kernel length
+    #     test_sample = int((len(ds_test) - kernel) / test_stride) + 1
+    #
+    #     # Number of single anomaly point
+    #     tot = results['support'].sum()
+    #     pct_tot = 100 * tot / (test_sample * test_stride)
+    #
+    #     print("Results: {} (record {:.02f})".format(tot, pct_tot))
+    #
+    #     if with_skip:
+    #         # Number of anomaly sample
+    #         tot_sample = int(tot / test_stride)
+    #         print("Anomaly Sample: {} (test sample {:.02f})".format(int(tot_sample), test_sample))
 
 
 if __name__ == '__main__':
