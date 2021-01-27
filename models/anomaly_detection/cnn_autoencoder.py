@@ -84,6 +84,7 @@ class CNNAutoEncoder(object):
             epochs=100,
             batch_size=128,
             validation_split=0.1,
+            verbose=2,
             callbacks=[
                 keras.callbacks.EarlyStopping(monitor="val_loss", patience=20, mode="min")
             ],

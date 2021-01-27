@@ -10,6 +10,7 @@ from models.anomaly_detection.LOF.local_outlier_factor import LOF
 from models.anomaly_detection.PCA.pca import PCA
 
 from models.anomaly_detection.cnn_autoencoder import CNNAutoEncoder
+from models.anomaly_detection.lstm_autoencoder import LSTMAutoEncoder
 
 from utils.tools import get_sliding_window_matrix
 
@@ -41,6 +42,8 @@ def get_model(model_type, params_file=None):
         model = LOF(**params)
     elif model_type == 'cnn':
         model = CNNAutoEncoder(**params)
+    elif model_type == 'lstm':
+        model = LSTMAutoEncoder(**params)
     else:
         raise ValueError('{} does not exist'.format(model_type))
 
@@ -56,6 +59,7 @@ def predict_anomaly(ds, model, kernel, with_skip=True):
     # Create set
     print("Create testing set")
     x_test = get_sliding_window_matrix(ds.values, kernel, stride)
+    print('Test shape ', x_test.shape)
 
     # Testing
     print('Testing...')
