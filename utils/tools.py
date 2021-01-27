@@ -67,7 +67,7 @@ def create_triplet_time_series(ts: pd.Series, with_support: bool = False):
         if start == -1 and val > 0:
             start = k
             support = 0
-        elif start > 0 and val == 0:
+        elif start >= 0 and val == 0:
             x = {
                 'feature': ts.name,
                 'start': start,

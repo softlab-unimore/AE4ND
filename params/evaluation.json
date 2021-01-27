@@ -20,9 +20,5 @@
   "kernel": 288,
   "stride": 77,
 
-  "train_step": 5,
-  "test_step": 5,
-
   "model_type":  "cnn"
-
 }
