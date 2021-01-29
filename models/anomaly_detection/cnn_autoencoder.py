@@ -5,12 +5,14 @@ import numpy as np
 # import pandas as pd
 from tensorflow import keras
 from tensorflow.keras import layers
+
+
 # import matplotlib.pyplot as plt
 
 
 class CNNAutoEncoder(object):
 
-    def __init__(self, learning_rate=0.01):
+    def __init__(self, with_lazy=True, learning_rate=0.01):
         """ CNN AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None
@@ -19,7 +21,9 @@ class CNNAutoEncoder(object):
         self.loss = 'mae'
 
         self.history = None
+        self.with_lazy = with_lazy
         self.threshold = 0
+        # self.lazy_threshold
 
     def _set_input(self, X):
         assert len(X.shape) == 3, 'Invalid input shape'
@@ -72,6 +76,13 @@ class CNNAutoEncoder(object):
         # Get reconstruction loss threshold.
         threshold = np.max(train_mae_loss)
         print("Reconstruction error threshold: ", threshold)
+
+        if self.with_lazy:
+            # threshold = threshold + np.std(train_mae_loss)
+            iqr = np.quantile(train_mae_loss, 0.75) - np.quantile(train_mae_loss, 0.25)
+            threshold = threshold + 10 * iqr
+            print("Use lazy reconstruction error threshold: ", threshold)
+
         self.threshold = np.max(threshold, self.threshold)
 
     def fit(self, x):
@@ -120,6 +131,9 @@ class CNNAutoEncoder(object):
         # Detect all the samples which are anomalies.
         anomalies = test_mae_loss > self.threshold
         print("Number of anomaly samples: ", np.sum(anomalies))
+        print("Mean Error: ", np.mean(test_mae_loss))
+        print("Max Error: ", np.max(test_mae_loss))
+
         # print("Indices of anomaly samples: ", np.where(anomalies))
 
         return anomalies
@@ -138,4 +152,3 @@ class CNNAutoEncoder(object):
         print("Mean distance from threshold: {:.05f}".format(np.mean(scores)))
 
         return scores
-

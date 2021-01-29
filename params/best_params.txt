@@ -1,0 +1,14 @@
+setup_clustering
+kernel 120
+stride 1
+{
+  "distance": "euclidean",
+  "max_distance": 0.2,
+  "anomaly_threshold": 0.2
+}
+
+cnn_autoencoder
+kernel 288
+stride 1
+10 * iqr
+

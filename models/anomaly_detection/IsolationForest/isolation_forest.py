@@ -18,7 +18,7 @@ from sklearn.ensemble import IsolationForest as iForest
 
 class IsolationForest(object):
 
-    def __init__(self, n_estimators=100, max_samples='auto', contamination=0.03, max_features=0.5, **kwargs):
+    def __init__(self, n_estimators=100, max_samples='auto', contamination=0.00, max_features=0.5, **kwargs):
         """ The IsolationForest models for anomaly detection
         Arguments
         ---------

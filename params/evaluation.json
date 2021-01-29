@@ -17,8 +17,9 @@
     "Acceleration_Y3",
     "Acceleration_Z3"
   ],
-  "kernel": 288,
+  "kernel": 1,
   "stride": 1,
-  "with_decision_score":  true,
-  "model_type":  "cnn"
+  "model_type":  "pca",
+  "with_decision_score":  false,
+  "custom_resample":  true
 }

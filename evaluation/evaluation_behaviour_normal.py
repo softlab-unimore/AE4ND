@@ -8,7 +8,7 @@ from utils.manage_model import get_model, predict_anomaly
 from utils.manage_file import get_files, read_ds_lvm
 from utils.tools import create_triplet_time_series, get_sliding_window_matrix
 
-from transforms.transformer import resample
+from transforms.transformer import resample, resample_with_feature_extractor
 
 
 def get_argument():
@@ -77,7 +77,8 @@ def main():
     kernel = params['kernel']
     stride = params['stride']
     model_type = params['model_type']
-    with_decision_score = params['with_decision_score']
+    with_decision_score = params.get('with_decision_score', False)
+    custom_resample = params.get('custom_resample', False)
 
     resample_rate = 6400  # 12800 sample are 1 second
     # num_sample = 1000000
@@ -106,7 +107,7 @@ def main():
 
     # Get files from selected folder to use for training and testing
     curr_files = []
-    for folder in all_state_folder[1:2]:
+    for folder in all_state_folder[:2]:
         curr_files += get_files(folder, ext='lvm')[:5]
 
     test_files = curr_files
@@ -124,14 +125,18 @@ def main():
             print('Impossible read train file')
             continue
 
+        # Select features
+        ds_train = ds_train[features_list]
+
+        # Resample
         train_len = len(ds_train)
-        ds_train = resample(ds_train, resample_rate)
+        if custom_resample:
+            ds_train = resample_with_feature_extractor(ds_train, resample_rate)
+        else:
+            ds_train = resample(ds_train, resample_rate)
         # ds_train = ds_train[:num_sample]
         print('Train Original File Length: ', train_len)
         print('New File Length {} {:.02f}'.format(len(ds_train), 100 * len(ds_train) / train_len))
-
-        # Select features
-        ds_train = ds_train[features_list]
 
         # Create training set
         print("Create training set")
@@ -166,8 +171,12 @@ def main():
             # Select features
             ds_test = ds_test[features_list]
 
+            # Resample
             test_len = len(ds_test)
-            ds_test = resample(ds_test, resample_rate)
+            if custom_resample:
+                ds_test = resample_with_feature_extractor(ds_test, resample_rate)
+            else:
+                ds_test = resample(ds_test, resample_rate)
             # ds_test = ds_test[:num_sample]
             print('Test Original File Length: ', test_len)
             print('New File Length {} {:.02f}'.format(len(ds_test), 100 * len(ds_test) / test_len))
@@ -200,8 +209,8 @@ def main():
                 print("Results: NO Anomaly founded")
             else:
                 print("Results: {} anomalies "
-                      "({:.05f} {:.05f} total {})".format(
-                    num_error, mean_error, mean_only_error, len(x_test)))
+                      "({:.05f} total {})".format(
+                    num_error, mean_error, len(x_test)))
 
             result_record = {
                 'MODEL': model_type,
@@ -220,7 +229,6 @@ def main():
             }
 
             result_array.append(result_record)
-
 
             # # Testing
             # y_pred = predict_anomaly(ds_test, model, kernel, with_skip=with_skip)

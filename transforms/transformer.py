@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
+from transforms.extractor import *
 
 
 def moving_average(ds: pd.DataFrame, window: int = 7):
@@ -22,6 +23,29 @@ def resample_custom(ds: pd.DataFrame, rate: int, custom):
     new_index = new_index // rate
 
     return ds.groupby(new_index).agg(custom)
+
+
+def resample_with_feature_extractor(ds: pd.DataFrame, rate: int):
+    custom_function = {
+        'mean': mean,
+        'peak': peak,
+        'peak_to_peak': peak_to_peak,
+        'rms': rms,
+        'crest_factor': crest_factor,
+        'skewness': skewness,
+        'kurtosis': kurtosis,
+        'shape_factor': shape_factor
+    }
+
+    res_ds = []
+    for key, custom in custom_function.items():
+        new_ds = resample_custom(ds, rate, custom)
+        new_ds.columns = ['{}_{}'.format(key, col) for col in new_ds.columns]
+
+        res_ds.append(new_ds)
+
+    res_ds = pd.concat(res_ds, axis=1)
+    return res_ds
 
 
 def get_transformer(ds: pd.DataFrame, transform_type: str):

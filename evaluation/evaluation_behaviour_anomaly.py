@@ -6,14 +6,15 @@ from utils.manage_model import get_model, predict_anomaly
 from utils.manage_file import read_ds_lvm
 from utils.tools import create_triplet_time_series, get_sliding_window_matrix
 
-from transforms.transformer import resample
+from transforms.transformer import resample, resample_with_feature_extractor
 
 # Input files
 # train_file = r'data/simulation/testaccelerometri_2.lvm'
 # test_file = r'data/simulation/testaccelerometri_3.lvm'
 
 train_file = r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 2\testaccelerometri(2).lvm'
-test_file = r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 3\testaccelerometri_1(2).lvm'
+test_file = r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 2\testaccelerometri(1).lvm'
+# test_file = r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 3\testaccelerometri_1(2).lvm'
 
 # Features
 features_list = [
@@ -23,19 +24,19 @@ features_list = [
 ]
 
 # Data preparation params
-kernel = 288
+kernel = 120
 stride = 1
 
-# num_sample = 1000000
 resample_rate = 6400  # 12800 sample are 1 second
+custom_resample = False
 
 # Model params
-model_type = 'cnn'
+model_type = 'setup_clustering'
 params_file = './params/params_{}.json'.format(model_type)
 
 # Type of test
 with_skip = False
-with_decision_score = True
+with_decision_score = False
 
 
 def main():
@@ -49,14 +50,18 @@ def main():
         print('Impossible read train file')
         return
 
+    # Select features
+    ds_train = ds_train[features_list]
+
+    # Resample
     train_len = len(ds_train)
-    ds_train = resample(ds_train, resample_rate)
+    if custom_resample:
+        ds_train = resample_with_feature_extractor(ds_train, resample_rate)
+    else:
+        ds_train = resample(ds_train, resample_rate)
     # ds_train = ds_train[:num_sample]
     print('Train Original File Length: ', train_len)
     print('New File Length {} {:.02f}'.format(len(ds_train), 100 * len(ds_train) / train_len))
-
-    # Select features
-    ds_train = ds_train[features_list]
 
     # Create training set
     print("Create training set")
@@ -81,14 +86,18 @@ def main():
         print('Impossible read test file')
         return
 
+    # Select features
+    ds_test = ds_test[features_list]
+
+    # Resample
     test_len = len(ds_test)
-    ds_test = resample(ds_test, resample_rate)
+    if custom_resample:
+        ds_test = resample_with_feature_extractor(ds_test, resample_rate)
+    else:
+        ds_test = resample(ds_test, resample_rate)
     # ds_test = ds_test[:num_sample]
     print('Test Original File Length: ', test_len)
     print('New File Length {} {:.02f}'.format(len(ds_test), 100 * len(ds_test) / test_len))
-
-    # Select features
-    ds_test = ds_test[features_list]
 
     # Testing
     # y_pred = predict_anomaly(ds_test, model, kernel, with_skip=with_skip)
