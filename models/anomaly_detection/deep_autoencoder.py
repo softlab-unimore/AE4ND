@@ -1,5 +1,5 @@
 """
-The implementation of LSTM AutoEncoder models for anomaly detection.
+The implementation of CNN AutoEncoder models for anomaly detection.
 """
 import numpy as np
 # import pandas as pd
@@ -10,10 +10,10 @@ from tensorflow.keras import layers
 # import matplotlib.pyplot as plt
 
 
-class LSTMAutoEncoder(object):
+class DeepAutoEncoder(object):
 
-    def __init__(self, with_lazy=True, learning_rate=0.01):
-        """ LSTM AutoEncoder models for anomaly detection """
+    def __init__(self, with_lazy=False, learning_rate=0.01):
+        """ Deep AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None
 
@@ -23,27 +23,24 @@ class LSTMAutoEncoder(object):
         self.history = None
         self.with_lazy = with_lazy
         self.threshold = 0
+        # self.lazy_threshold
 
     def _set_input(self, X):
-        assert len(X.shape) == 3, 'Invalid input shape'
-        self.sequence_length = X.shape[1]
-        self.num_features = X.shape[2]
+        assert len(X.shape) == 2, 'Invalid input shape'
+        self.num_features = X.shape[1]
 
     def _define_model(self, ):
-        # model.add())
-        # model.add(RepeatVector(n_in))
-        # model.add(LSTM(100, activation='relu', return_sequences=True))
-        # model.add(TimeDistributed(Dense(1)))
-
         model = keras.Sequential(
             [
-                layers.Input(shape=(self.sequence_length, self.num_features)),
-                layers.LSTM(100, activation='relu', return_sequences=True),
-                layers.LSTM(64, activation='relu', return_sequences=False),
-                layers.RepeatVector(self.sequence_length),
-                layers.LSTM(64, activation='relu', return_sequences=True),
-                layers.LSTM(100, activation='relu', return_sequences=True),
-                layers.TimeDistributed(layers.Dense(self.num_features))
+                layers.Input(shape=self.num_features),
+                layers.Dense(32, activation='relu'),
+                layers.Dropout(rate=0.2),
+                layers.Dense(16, activation='relu'),
+                # layers.Dense(8, activation='relu'),
+                # layers.Dense(16, activation='relu'),
+                layers.Dropout(rate=0.2),
+                layers.Dense(32, activation='relu'),
+                layers.Dense(self.num_features),
             ]
         )
         model.compile(optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate), loss=self.loss)
@@ -85,7 +82,8 @@ class LSTMAutoEncoder(object):
         self.threshold = np.max(threshold, self.threshold)
 
     def fit(self, x):
-        print('LSTM AutoEncoder Fit')
+        print('Deep AutoEncoder Fit')
+        x = x.reshape((len(x), -1))
         self._set_input(x)
         self._define_model()
 
@@ -94,7 +92,7 @@ class LSTMAutoEncoder(object):
             epochs=100,
             batch_size=128,
             validation_split=0.1,
-            verbose=0,
+            verbose=2,
             callbacks=[
                 keras.callbacks.EarlyStopping(monitor="val_loss", patience=20, mode="min")
             ],
@@ -109,6 +107,8 @@ class LSTMAutoEncoder(object):
         self._set_reconstruction_error(x)
 
     def tune(self, new_x):
+        new_x = new_x.reshape((len(new_x), -1))
+
         self.model.fit(
             x=new_x, y=new_x,
             epochs=50,
@@ -122,7 +122,8 @@ class LSTMAutoEncoder(object):
         self._set_reconstruction_error(new_x)
 
     def predict(self, x):
-        print('LSTM AutoEncoder Predict')
+        print('Deep AutoEncoder Predict')
+        x = x.reshape((len(x), -1))
         x_pred = self.model.predict(x)
 
         test_mae_loss = self._compute_reconstruction_error(x, x_pred)
@@ -130,15 +131,16 @@ class LSTMAutoEncoder(object):
         # Detect all the samples which are anomalies.
         anomalies = test_mae_loss > self.threshold
         print("Number of anomaly samples: ", np.sum(anomalies))
-        print("Mean Error: ", np.mean(test_mae_loss))
-        print("Max Error: ", np.max(test_mae_loss))
+        print("Mean reconstruction error: ", np.mean(test_mae_loss))
+        print("Max reconstruction error: ", np.max(test_mae_loss))
 
         # print("Indices of anomaly samples: ", np.where(anomalies))
 
         return anomalies
 
     def decision_score(self, x):
-        print('LSTM AutoEncoder Decision Score')
+        print('Deep AutoEncoder Decision Score')
+        x = x.reshape((len(x), -1))
         x_pred = self.model.predict(x)
 
         test_mae_loss = self._compute_reconstruction_error(x, x_pred)

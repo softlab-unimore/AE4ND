@@ -11,6 +11,7 @@ from models.anomaly_detection.PCA.pca import PCA
 
 from models.anomaly_detection.cnn_autoencoder import CNNAutoEncoder
 from models.anomaly_detection.lstm_autoencoder import LSTMAutoEncoder
+from models.anomaly_detection.deep_autoencoder import DeepAutoEncoder
 
 from utils.tools import get_sliding_window_matrix
 
@@ -44,6 +45,8 @@ def get_model(model_type, params_file=None):
         model = CNNAutoEncoder(**params)
     elif model_type == 'lstm':
         model = LSTMAutoEncoder(**params)
+    elif model_type == 'deep':
+        model = DeepAutoEncoder(**params)
     else:
         raise ValueError('{} does not exist'.format(model_type))
 

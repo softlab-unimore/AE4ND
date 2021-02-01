@@ -17,9 +17,12 @@
     "Acceleration_Y3",
     "Acceleration_Z3"
   ],
-  "kernel": 1,
+
+  "kernel": 288,
   "stride": 1,
-  "model_type":  "pca",
+
+  "model_type":  "lstm",
+
   "with_decision_score":  false,
-  "custom_resample":  true
+  "custom_resample":  false
 }

@@ -76,6 +76,10 @@ class CNNAutoEncoder(object):
         # Get reconstruction loss threshold.
         threshold = np.max(train_mae_loss)
         print("Reconstruction error threshold: ", threshold)
+        print("Min error: ", np.min(train_mae_loss))
+        print("Max error: ", np.max(train_mae_loss))
+        print("Average error: ", np.mean(train_mae_loss))
+        print("Std error: ", np.std(train_mae_loss))
 
         if self.with_lazy:
             # threshold = threshold + np.std(train_mae_loss)

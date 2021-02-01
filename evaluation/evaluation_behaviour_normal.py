@@ -107,7 +107,7 @@ def main():
 
     # Get files from selected folder to use for training and testing
     curr_files = []
-    for folder in all_state_folder[:2]:
+    for folder in all_state_folder:
         curr_files += get_files(folder, ext='lvm')[:5]
 
     test_files = curr_files
