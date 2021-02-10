@@ -18,11 +18,11 @@
     "Acceleration_Z3"
   ],
 
-  "kernel": 288,
+  "kernel": 1,
   "stride": 1,
 
-  "model_type":  "lstm",
+  "model_type":  "deep",
 
-  "with_decision_score":  false,
-  "custom_resample":  false
+  "with_decision_score":  true,
+  "custom_resample":  true
 }

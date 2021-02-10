@@ -83,8 +83,9 @@ class CNNAutoEncoder(object):
 
         if self.with_lazy:
             # threshold = threshold + np.std(train_mae_loss)
-            iqr = np.quantile(train_mae_loss, 0.75) - np.quantile(train_mae_loss, 0.25)
-            threshold = threshold + 10 * iqr
+            # iqr = np.quantile(train_mae_loss, 0.75) - np.quantile(train_mae_loss, 0.25)
+            # threshold = threshold + 10 * iqr
+            threshold = threshold + 0.002
             print("Use lazy reconstruction error threshold: ", threshold)
 
         self.threshold = np.max(threshold, self.threshold)

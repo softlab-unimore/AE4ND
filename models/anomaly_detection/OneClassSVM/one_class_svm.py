@@ -12,6 +12,8 @@ import logging
 import numpy as np
 from sklearn.svm import OneClassSVM as SVM
 
+from transforms.transformer import get_transformer
+
 
 class OneClassSVM(object):
 
@@ -42,8 +44,9 @@ class OneClassSVM(object):
             For more information, please visit https://scikit-learn.org/stable/modules/generated/sklearn.svm.OneClassSVM.html
         """
         self.model = SVM(kernel=kernel, gamma=gamma, tol=tol, nu=nu, shrinking=shrinking, **kwargs)
+        self.transformer = None
 
-    def fit(self, X):
+    def fit(self, x):
         """
         Arguments
         ---------
@@ -51,10 +54,14 @@ class OneClassSVM(object):
         """
 
         logging.info('====== OneClassSVM Fit ======')
-        X = X.reshape((len(X), -1))
-        self.model.fit(X)
+        x = x.reshape((len(x), -1))
 
-    def predict(self, X):
+        self.transformer = get_transformer(x, 'std')
+        x = self.transformer.transform(x)
+
+        self.model.fit(x)
+
+    def predict(self, x):
         """ Predict anomalies with mined invariants
         Arguments
         ---------
@@ -64,7 +71,8 @@ class OneClassSVM(object):
             y_pred: ndarray, the predicted label vector of shape (num_instances,)
         """
         logging.info('====== OneClassSVM Predict ======')
-        X = X.reshape((len(X), -1))
-        y_pred = self.model.predict(X)
+        x = X.reshape((len(x), -1))
+        x = self.transformer.transform(x)
+        y_pred = self.model.predict(x)
         y_pred = np.where(y_pred > 0, 0, 1)
         return y_pred

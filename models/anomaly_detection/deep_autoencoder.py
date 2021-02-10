@@ -6,6 +6,7 @@ import numpy as np
 from tensorflow import keras
 from tensorflow.keras import layers
 
+from transforms.transformer import get_transformer
 
 # import matplotlib.pyplot as plt
 
@@ -19,6 +20,8 @@ class DeepAutoEncoder(object):
 
         self.learning_rate = learning_rate
         self.loss = 'mse'
+
+        self.transformer = None
 
         self.history = None
         self.with_lazy = with_lazy
@@ -35,7 +38,7 @@ class DeepAutoEncoder(object):
                 layers.Input(shape=self.num_features),
                 layers.Dense(32, activation='relu'),
                 layers.Dropout(rate=0.2),
-                layers.Dense(16, activation='relu'),
+                layers.Dense(8, activation='relu'),
                 # layers.Dense(8, activation='relu'),
                 # layers.Dense(16, activation='relu'),
                 layers.Dropout(rate=0.2),
@@ -66,7 +69,7 @@ class DeepAutoEncoder(object):
         # plt.show()
 
         # Get reconstruction loss threshold.
-        threshold = np.max(train_mae_loss)
+        threshold = np.mean(train_mae_loss)
         print("Reconstruction error threshold: ", threshold)
         print("Min error: ", np.min(train_mae_loss))
         print("Max error: ", np.max(train_mae_loss))
@@ -86,6 +89,9 @@ class DeepAutoEncoder(object):
         x = x.reshape((len(x), -1))
         self._set_input(x)
         self._define_model()
+
+        self.transformer = get_transformer(x, 'std')
+        x = self.transformer.transform(x)
 
         history = self.model.fit(
             x=x, y=x,
@@ -109,6 +115,8 @@ class DeepAutoEncoder(object):
     def tune(self, new_x):
         new_x = new_x.reshape((len(new_x), -1))
 
+        new_x = self.transformer.transform(new_x)
+
         self.model.fit(
             x=new_x, y=new_x,
             epochs=50,
@@ -124,6 +132,9 @@ class DeepAutoEncoder(object):
     def predict(self, x):
         print('Deep AutoEncoder Predict')
         x = x.reshape((len(x), -1))
+
+        x = self.transformer.transform(x)
+
         x_pred = self.model.predict(x)
 
         test_mae_loss = self._compute_reconstruction_error(x, x_pred)
@@ -141,6 +152,9 @@ class DeepAutoEncoder(object):
     def decision_score(self, x):
         print('Deep AutoEncoder Decision Score')
         x = x.reshape((len(x), -1))
+
+        x = self.transformer.transform(x)
+
         x_pred = self.model.predict(x)
 
         test_mae_loss = self._compute_reconstruction_error(x, x_pred)

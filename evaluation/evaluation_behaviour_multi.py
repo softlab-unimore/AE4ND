@@ -4,13 +4,11 @@ import argparse
 import numpy as np
 import pandas as pd
 
-from datetime import datetime
-
 from utils.manage_model import get_model, predict_anomaly
 from utils.manage_file import get_files, read_ds_lvm
 from utils.tools import create_triplet_time_series, get_sliding_window_matrix
 
-from transforms.transformer import resample, resample_with_feature_extractor, get_transformer
+from transforms.transformer import resample, resample_with_feature_extractor
 
 
 def get_argument():
@@ -28,50 +26,6 @@ def get_argument():
     return params
 
 
-# Input files
-# curr_state_folder = r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 2'
-# test_state_folder = r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 3'
-#
-# all_state_folder = [
-#     r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 2',
-#     r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 3',
-#     r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 4',
-#     r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 6 fail motore',
-# ]
-#
-# # Features
-# features_list = [
-#     "Acceleration_X1", "Acceleration_Y1", "Acceleration_Z1",
-#     # "Acceleration_X2", "Acceleration_Y2", "Acceleration_Z2",
-#     # "Acceleration_X3", "Acceleration_Y3", "Acceleration_Z3"
-# ]
-#
-# # Data preparation params
-# # kernel = 144  # 288
-# # stride = 77   # 77
-#
-# kernel = 288
-# stride = 77
-#
-# # start_sample = 500000
-# # num_sample = float('inf')
-# num_sample = 1000000
-#
-# train_step = 5
-# test_step = 5
-#
-# # max_test_step = 5000
-#
-# # Isolation Forest params
-# # model_type = 'setup_clustering'
-# model_type = 'cnn'
-# params_file = './params/params_{}.json'.format(model_type)
-#
-# save_result = True
-# overwrite = True
-# output_dir = './results'
-
-
 def main():
     params = get_argument()
     all_state_folder = params['all_state_folder']
@@ -83,7 +37,6 @@ def main():
     custom_resample = params.get('custom_resample', False)
 
     resample_rate = 6400  # 12800 sample are 1 second
-    # num_sample = 1000000
     with_skip = False
 
     params_file = './params/params_{}.json'.format(model_type)
@@ -110,7 +63,7 @@ def main():
     # Get files from selected folder to use for training and testing
     curr_files = []
     for folder in all_state_folder:
-        curr_files += get_files(folder, ext='lvm')[:5]
+        curr_files += get_files(folder, ext='lvm')[:3]
 
     test_files = curr_files
 
@@ -164,8 +117,6 @@ def main():
             print("\n State Test: ", test_state)
             print("Read Test File: ", os.path.basename(test_file))
             ds_test = read_ds_lvm(test_file, get_header=False)
-
-            # t1 = datetime.now()
 
             # Check test
             if ds_test is None or ds_test.empty:
@@ -233,9 +184,6 @@ def main():
             }
 
             result_array.append(result_record)
-
-            # t2 = datetime.now()
-            # print('Time: ', t2 - t1)
 
             # # Testing
             # y_pred = predict_anomaly(ds_test, model, kernel, with_skip=with_skip)
