@@ -58,28 +58,28 @@ class IsolationForest(object):
                              contamination=contamination,
                              max_features=max_features, **kwargs)
 
-    def fit(self, X):
+    def fit(self, x):
         """
         Arguments
         ---------
-            X: ndarray, the event count matrix of shape num_instances-by-num_events
+            x: ndarray, the event count matrix of shape num_instances-by-num_events
         """
 
-        logging.info('====== Isolation Forest Fit ======')
-        X = X.reshape((len(X), -1))
-        self.model.fit(X)
+        print('Isolation Forest Fit')
+        x = x.reshape((len(x), -1))
+        self.model.fit(x)
 
-    def predict(self, X):
+    def predict(self, x):
         """ Predict anomalies with mined invariants
         Arguments
         ---------
-            X: the input event count matrix
+            x: the input event count matrix
         Returns
         -------
             y_pred: ndarray, the predicted label vector of shape (num_instances,)
         """
-        logging.info('====== Isolation Forest Predict ======')
-        X = X.reshape((len(X), -1))
-        y_pred = self.model.predict(X)
+        logging.info('Isolation Forest Predict')
+        x = x.reshape((len(x), -1))
+        y_pred = self.model.predict(x)
         y_pred = np.where(y_pred > 0, 0, 1)
         return y_pred

@@ -23,7 +23,6 @@ class CNNAutoEncoder(object):
         self.history = None
         self.with_lazy = with_lazy
         self.threshold = 0
-        # self.lazy_threshold
 
     def _set_input(self, X):
         assert len(X.shape) == 3, 'Invalid input shape'
@@ -85,7 +84,7 @@ class CNNAutoEncoder(object):
             # threshold = threshold + np.std(train_mae_loss)
             # iqr = np.quantile(train_mae_loss, 0.75) - np.quantile(train_mae_loss, 0.25)
             # threshold = threshold + 10 * iqr
-            threshold = threshold + 0.002
+            threshold = threshold + 0.001
             print("Use lazy reconstruction error threshold: ", threshold)
 
         self.threshold = np.max(threshold, self.threshold)
@@ -97,12 +96,12 @@ class CNNAutoEncoder(object):
 
         history = self.model.fit(
             x=x, y=x,
-            epochs=100,
+            epochs=50,
             batch_size=128,
             validation_split=0.1,
             verbose=0,
             callbacks=[
-                keras.callbacks.EarlyStopping(monitor="val_loss", patience=20, mode="min")
+                keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, mode="min")
             ],
         )
         self.history = history

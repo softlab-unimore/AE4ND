@@ -1,0 +1,136 @@
+ONE CLASS SVM
+
+minmax + one class svm
+    "kernel": 10,
+    "stride": 1,
+    "resample_rate": 6400,
+    "custom_resample":  false
+    {
+      "nu": 0.00001,
+      "tol": 0.00001,
+      "kernel": "sigmoid",
+      "gamma": "auto"
+    }
+
+minmax + one class svm
+    "kernel": 1,
+    "stride": 1,
+    "resample_rate": 12800,
+    "custom_resample":  true
+    {
+      "nu": 0.00001,
+      "tol": 0.00001,
+      "kernel": "rbf",
+      "gamma": "auto"
+    }
+
+ISOLATION FOREST
+
+isolation forest
+    "kernel": 10,
+    "stride": 1,
+    "resample_rate": 6400,
+    "custom_resample":  false
+    {
+      "n_estimators": 100,
+      "max_samples": 0.5,
+      "max_features": 0.8,
+      "bootstrap": false
+    }
+
+isolation forest
+    "kernel": 1,
+    "stride": 1,
+    "resample_rate": 12800,
+    "custom_resample":  true
+    {
+      "n_estimators": 100,
+      "max_samples": 0.5,
+      "max_features": 0.8,
+      "bootstrap": true
+    }
+
+LOF
+
+lof
+    "kernel": 10,
+    "stride": 1,
+    "resample_rate": 6400,
+    "custom_resample":  false
+    {
+      "n_neighbors": 50,
+      "algorithm": "auto",
+      "metric": "minkowski"
+    }
+
+lof
+    "kernel": 1,
+    "stride": 1,
+    "resample_rate": 12800,
+    "custom_resample":  true
+    {
+      "n_neighbors": 30,
+      "algorithm": "auto",
+      "metric": "minkowski"
+    }
+
+SETUP CLUSTERING
+
+clustering
+    "kernel": 10,
+    "stride": 1,
+    "resample_rate": 6400,
+    "custom_resample":  false
+    {
+      "distance": "euclidean",
+      "max_distance": 0.05,
+      "anomaly_threshold": 0.05,
+      "transformer": ""
+    }
+
+
+clustering
+    "kernel": 1,
+    "stride": 1,
+    "resample_rate": 12800,
+    "custom_resample":  true
+    {
+      "distance": "euclidean",
+      "max_distance": 10,
+      "anomaly_threshold": 10,
+      "transformer": "std"
+    }
+
+PCA
+
+pca
+    "kernel": 10,
+    "stride": 1,
+    "resample_rate": 6400,
+    "custom_resample":  false
+    {
+      "n_components": 0.95,
+      "threshold": 0.005
+    }
+
+
+pca
+    "kernel": 1,
+    "stride": 1,
+    "resample_rate": 12800,
+    "custom_resample":  true
+    {
+      "n_components": 0.95,
+      "c_alpha": 1.7507
+    }
+
+
+CNN
+
+cnn
+    "kernel": 240,
+    "stride": 1,
+    "resample_rate": 6400,
+    "custom_resample":  false
+
+

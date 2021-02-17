@@ -12,13 +12,13 @@ from tensorflow.keras import layers
 
 class LSTMAutoEncoder(object):
 
-    def __init__(self, with_lazy=True, learning_rate=0.01):
+    def __init__(self, with_lazy=False, learning_rate=0.01):
         """ LSTM AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None
 
         self.learning_rate = learning_rate
-        self.loss = 'mse'
+        self.loss = 'mae'
 
         self.history = None
         self.with_lazy = with_lazy
@@ -78,8 +78,8 @@ class LSTMAutoEncoder(object):
 
         if self.with_lazy:
             # threshold = threshold + np.std(train_mae_loss)
-            iqr = np.quantile(train_mae_loss, 0.75) - np.quantile(train_mae_loss, 0.25)
-            threshold = threshold + 10 * iqr
+            # iqr = np.quantile(train_mae_loss, 0.75) - np.quantile(train_mae_loss, 0.25)
+            threshold = threshold + 0.001
             print("Use lazy reconstruction error threshold: ", threshold)
 
         self.threshold = np.max(threshold, self.threshold)
@@ -91,12 +91,12 @@ class LSTMAutoEncoder(object):
 
         history = self.model.fit(
             x=x, y=x,
-            epochs=100,
+            epochs=50,
             batch_size=128,
             validation_split=0.1,
-            verbose=0,
+            verbose=2,
             callbacks=[
-                keras.callbacks.EarlyStopping(monitor="val_loss", patience=20, mode="min")
+                keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, mode="min")
             ],
         )
         self.history = history

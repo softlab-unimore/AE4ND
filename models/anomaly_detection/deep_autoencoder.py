@@ -8,6 +8,7 @@ from tensorflow.keras import layers
 
 from transforms.transformer import get_transformer
 
+
 # import matplotlib.pyplot as plt
 
 
@@ -19,7 +20,7 @@ class DeepAutoEncoder(object):
         self.num_features = None
 
         self.learning_rate = learning_rate
-        self.loss = 'mse'
+        self.loss = 'mae'
 
         self.transformer = None
 
@@ -39,8 +40,6 @@ class DeepAutoEncoder(object):
                 layers.Dense(32, activation='relu'),
                 layers.Dropout(rate=0.2),
                 layers.Dense(8, activation='relu'),
-                # layers.Dense(8, activation='relu'),
-                # layers.Dense(16, activation='relu'),
                 layers.Dropout(rate=0.2),
                 layers.Dense(32, activation='relu'),
                 layers.Dense(self.num_features),
@@ -69,7 +68,7 @@ class DeepAutoEncoder(object):
         # plt.show()
 
         # Get reconstruction loss threshold.
-        threshold = np.mean(train_mae_loss)
+        threshold = np.max(train_mae_loss)
         print("Reconstruction error threshold: ", threshold)
         print("Min error: ", np.min(train_mae_loss))
         print("Max error: ", np.max(train_mae_loss))
@@ -78,8 +77,8 @@ class DeepAutoEncoder(object):
 
         if self.with_lazy:
             # threshold = threshold + np.std(train_mae_loss)
-            iqr = np.quantile(train_mae_loss, 0.75) - np.quantile(train_mae_loss, 0.25)
-            threshold = threshold + 10 * iqr
+            # iqr = np.quantile(train_mae_loss, 0.75) - np.quantile(train_mae_loss, 0.25)
+            threshold = threshold + 1
             print("Use lazy reconstruction error threshold: ", threshold)
 
         self.threshold = np.max(threshold, self.threshold)
@@ -95,12 +94,12 @@ class DeepAutoEncoder(object):
 
         history = self.model.fit(
             x=x, y=x,
-            epochs=100,
+            epochs=50,
             batch_size=128,
             validation_split=0.1,
-            verbose=2,
+            verbose=0,
             callbacks=[
-                keras.callbacks.EarlyStopping(monitor="val_loss", patience=20, mode="min")
+                keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, mode="min")
             ],
         )
         self.history = history

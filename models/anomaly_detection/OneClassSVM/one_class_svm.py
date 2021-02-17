@@ -17,46 +17,40 @@ from transforms.transformer import get_transformer
 
 class OneClassSVM(object):
 
-    def __init__(self, kernel='rbf', gamma='scale', tol=0.001, nu=0.5, shrinking=True, **kwargs):
+    def __init__(self, kernel='rbf', gamma='scale', tol=0.001, nu=0.5, shrinking=True, max_iter=1000):
         """ Unsupervised Outlier Detection.
         Arguments
         ---------
             kernel : {‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’}, optional (default=rbf).
                 Specifies the kernel type to be used in the algorithm.
                 It must be one of ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’ or a callable
-            degree : int, default=3
-                Degree of the polynomial kernel function (‘poly’). Ignored by all other kernels.
             gamma : {‘scale’, ‘auto’} or float, default=’scale’
                 Kernel coefficient for ‘rbf’, ‘poly’ and ‘sigmoid’.
-            coef0 : float, default=0.0
-                Independent term in kernel function. It is only significant in ‘poly’ and ‘sigmoid’.
             tol : float, default=1e-3
                 Tolerance for stopping criterion
             nu : float, default=0.5
                 An upper bound on the fraction of training errors and a lower bound of the fraction of support vectors.
                 Should be in the interval (0, 1]. By default 0.5 will be taken
-            shrinking : bool, default=True
-                Whether to use the shrinking heuristic
-            cache_size : float, default=200
-                Specify the size of the kernel cache (in MB).
+            max_iter : int, default=-1
+                Hard limit on iterations within solver, or -1 for no limit.
         Reference
         ---------
             For more information, please visit https://scikit-learn.org/stable/modules/generated/sklearn.svm.OneClassSVM.html
         """
-        self.model = SVM(kernel=kernel, gamma=gamma, tol=tol, nu=nu, shrinking=shrinking, **kwargs)
+        self.model = SVM(kernel=kernel, gamma=gamma, tol=tol, nu=nu, shrinking=shrinking, max_iter=max_iter)
         self.transformer = None
 
     def fit(self, x):
         """
         Arguments
         ---------
-            X: ndarray, the event count matrix of shape num_instances-by-num_events
+            x: ndarray, the event count matrix of shape num_instances-by-num_events
         """
 
-        logging.info('====== OneClassSVM Fit ======')
+        print('OneClassSVM Fit')
         x = x.reshape((len(x), -1))
 
-        self.transformer = get_transformer(x, 'std')
+        self.transformer = get_transformer(x, 'minmax')
         x = self.transformer.transform(x)
 
         self.model.fit(x)
@@ -65,14 +59,16 @@ class OneClassSVM(object):
         """ Predict anomalies with mined invariants
         Arguments
         ---------
-            X: the input event count matrix
+            x: the input event count matrix
         Returns
         -------
             y_pred: ndarray, the predicted label vector of shape (num_instances,)
         """
-        logging.info('====== OneClassSVM Predict ======')
-        x = X.reshape((len(x), -1))
+        print('OneClassSVM Predict')
+        x = x.reshape((len(x), -1))
         x = self.transformer.transform(x)
+
         y_pred = self.model.predict(x)
+
         y_pred = np.where(y_pred > 0, 0, 1)
         return y_pred

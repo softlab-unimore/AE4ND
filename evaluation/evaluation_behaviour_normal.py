@@ -79,10 +79,11 @@ def main():
     kernel = params['kernel']
     stride = params['stride']
     model_type = params['model_type']
+    resample_rate = params.get('resample_rate', 6400)
     with_decision_score = params.get('with_decision_score', False)
     custom_resample = params.get('custom_resample', False)
 
-    resample_rate = 6400  # 12800 sample are 1 second
+    # resample_rate = 12800  # 12800 sample are 1 second
     # num_sample = 1000000
     with_skip = False
 
@@ -91,18 +92,6 @@ def main():
     overwrite = True
     output_dir = './results'
 
-    # train_state = os.path.basename(curr_state_folder)
-    # test_state = os.path.basename(test_state_folder)
-    # print('Current State folder: ', train_state)
-    # print('Test State folder: ', test_state)
-    #
-    # if not os.path.isdir(curr_state_folder) or not os.path.isdir(test_state_folder):
-    #     print('No folder selected')
-    #     return
-
-    # curr_files = get_files(curr_state_folder, ext='lvm')
-    # test_files = get_files(test_state_folder, ext='lvm')
-
     # Initialize result array to memorize result
     # for each train and test step
     result_array = []
@@ -110,12 +99,12 @@ def main():
     # Get files from selected folder to use for training and testing
     curr_files = []
     for folder in all_state_folder:
-        curr_files += get_files(folder, ext='lvm')[:5]
+        curr_files += get_files(folder, ext='lvm')[:]
 
     test_files = curr_files
 
     for train_file in curr_files:
-        print('\n' + '#' * 70)
+        print('\n' + '|\\-/|/-\\' * 10)
 
         train_state = os.path.split(os.path.dirname(train_file))[-1]
         print("\n State Train: ", train_state)
@@ -234,55 +223,7 @@ def main():
 
             result_array.append(result_record)
 
-            # t2 = datetime.now()
-            # print('Time: ', t2 - t1)
-
-            # # Testing
-            # y_pred = predict_anomaly(ds_test, model, kernel, with_skip=with_skip)
-            #
-            # # Encoding results into triplet formats
-            # results = create_triplet_time_series(y_pred, with_support=True)
-            #
-            # # Show results
-            # results = pd.DataFrame(results)
-            #
-            # # Get test stride
-            # test_stride = kernel if with_skip else 1
-            # # Number of test samples of kernel length
-            # test_sample = int((len(ds_test) - kernel) / test_stride) + 1
-            #
-            # if results.empty:
-            #     tot, pct_tot, tot_sample = 0, 0, 0
-            #     print("Results: NO Anomaly founded")
-            # else:
-            #     # Number of single anomaly point
-            #     tot = results['support'].sum()
-            #     pct_tot = 100 * tot / (test_sample * test_stride)
-            #     print("Results: {} (record {:.02f})".format(tot, pct_tot))
-            #
-            #     # Number of anomaly sample
-            #     tot_sample = int(tot / test_stride)
-            #
-            #     if with_skip:
-            #         print("Anomaly Sample: {} (test sample {:.02f})".format(int(tot_sample), test_sample))
-            #
-            # result_record = {
-            #     'MODEL': model_type,
-            #     'KERNEL': kernel,
-            #     'STRIDE': stride,
-            #     'TRAIN_STATE': train_state,
-            #     'TRAIN': os.path.basename(train_file),
-            #     'TRAIN_SIZE': train_len,
-            #     'TEST_STATE': test_state,
-            #     'TEST': os.path.basename(test_file),
-            #     'TEST_LEN': test_len,
-            #     'NUM_SINGLE_ANOMALY': tot,
-            #     'PCT_ANOMALY': pct_tot,
-            #     'NUM_SAMPLE_ANOMALY': tot_sample,
-            #     'NUM_SAMPLE': test_sample,
-            # }
-            #
-            # result_array.append(result_record)
+        break
 
     if save_result:
         if not os.path.isdir(output_dir):

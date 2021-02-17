@@ -1,5 +1,6 @@
 {
   "distance": "euclidean",
-  "max_distance": 2000,
-  "anomaly_threshold": 2000
+  "max_distance": 0.05,
+  "anomaly_threshold": 0.05,
+  "transformer": ""
 }
