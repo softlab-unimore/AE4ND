@@ -223,13 +223,13 @@ def main():
 
             result_array.append(result_record)
 
-        break
+
 
     if save_result:
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir, exist_ok=True)
 
-        filename = os.path.join(output_dir, 'results_' + model_type + '.csv')
+        filename = os.path.join(output_dir, 'results_single' + model_type + '.csv')
 
         result_ds = pd.DataFrame(result_array)
 

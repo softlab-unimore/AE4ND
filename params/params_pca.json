@@ -1,4 +1,4 @@
 {
   "n_components": 0.95,
-  "threshold": 0.005
+  "c_alpha": 1.7507
 }

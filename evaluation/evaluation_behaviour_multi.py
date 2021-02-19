@@ -50,43 +50,70 @@ def main():
 
     result_array = []
 
-    # Get files from selected folder to use for training and testing
+    # Get list of list of files, where for each state we have a list of file
     curr_files = []
+
+    # Get list of test files
+    test_files = []
+
     for folder in all_state_folder:
-        curr_files += get_files(folder, ext='lvm')[:3]
+        files = get_files(folder, ext='lvm')
+        curr_files.append(files)
+        test_files += files
 
-    test_files = curr_files
+    max_size = min([len(files) for files in curr_files])
 
-    for train_file in curr_files:
+    # Get train files where each element is a list of files for a single train
+    train_files = []
+    for i in range(max_size):
+        train_pack = [files[i] for files in curr_files]
+
+        for j in range(1, len(train_pack)):
+            train_files.append(train_pack[:j + 1])
+
+    for train_pack in train_files:
         print('\n' + '|\\-/|/-\\' * 10)
 
-        train_state = os.path.split(os.path.dirname(train_file))[-1]
-        print("\n State Train: ", train_state)
-        print("Read Train File: ", os.path.basename(train_file))
-        ds_train = read_ds_lvm(train_file, get_header=False)
+        selected_files = []
+        train_states = []
+        x_states = []
 
-        # Check train
-        if ds_train is None or ds_train.empty:
-            print('Impossible read train file')
-            continue
+        for train_file in train_pack:
+            train_state = os.path.split(os.path.dirname(train_file))[-1]
+            print("\n State: ", train_state)
+            print("Read File: ", os.path.basename(train_file))
+            ds_train = read_ds_lvm(train_file, get_header=False)
 
-        # Select features
-        ds_train = ds_train[features_list]
+            # Check train
+            if ds_train is None or ds_train.empty:
+                print('Impossible read train file')
+                continue
 
-        # Resample
-        train_len = len(ds_train)
-        if custom_resample:
-            ds_train = resample_with_feature_extractor(ds_train, resample_rate)
-        else:
-            ds_train = resample(ds_train, resample_rate)
-        # ds_train = ds_train[:num_sample]
-        print('Train Original File Length: ', train_len)
-        print('New File Length {} {:.02f}'.format(len(ds_train), 100 * len(ds_train) / train_len))
+            # Select features
+            ds_train = ds_train[features_list]
 
-        # Create training set
-        print("Create training set")
-        x_train = get_sliding_window_matrix(ds_train.values, kernel, stride)
-        print('Train shape ', x_train.shape)
+            # Resample
+            train_len = len(ds_train)
+            if custom_resample:
+                ds_train = resample_with_feature_extractor(ds_train, resample_rate)
+            else:
+                ds_train = resample(ds_train, resample_rate)
+
+            # ds_train = ds_train[:num_sample]
+            print('Original File Length: ', train_len)
+            print('New File Length {} {:.02f}'.format(len(ds_train), 100 * len(ds_train) / train_len))
+
+            # Create training set
+            print("Create set")
+            x_train = get_sliding_window_matrix(ds_train.values, kernel, stride)
+            print('Shape ', x_train.shape)
+
+            selected_files.append(train_file)
+            train_states.append(train_state)
+            x_states.append(x_train)
+
+        x_states = np.vstack(x_states)
+        print('Train Size: ', x_states.shape)
 
         # Model initialization
         print("Model initialization: {}".format(model_type))
@@ -94,14 +121,13 @@ def main():
 
         # Training
         print("Training...")
-        model.fit(x_train)
+        model.fit(x_states)
 
         for test_file in test_files:
 
             test_state = os.path.split(os.path.dirname(test_file))[-1]
 
-            if train_state == test_state \
-                    and test_file == train_file:
+            if test_file in selected_files:
                 continue
 
             print("\n State Test: ", test_state)
@@ -163,27 +189,25 @@ def main():
                 'MODEL': model_type,
                 'KERNEL': kernel,
                 'STRIDE': stride,
-                'TRAIN_STATE': train_state,
-                'TRAIN': os.path.basename(train_file),
-                'TRAIN_SIZE': train_len,
+                'TRAIN_STATE': train_states,
+                'TRAIN': [os.path.basename(train_file) for train_file in selected_files],
                 'TEST_STATE': test_state,
                 'TEST': os.path.basename(test_file),
-                'TEST_LEN': test_len,
                 'NUM_SINGLE_ANOMALY': num_error,
                 'PCT_ANOMALY': mean_error,
                 'NUM_SAMPLE_ANOMALY': mean_only_error,
                 'NUM_SAMPLE': len(x_test),
+                'LABEL': test_state in train_states
             }
 
             result_array.append(result_record)
 
-        break
 
     if save_result:
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir, exist_ok=True)
 
-        filename = os.path.join(output_dir, 'results_' + model_type + '.csv')
+        filename = os.path.join(output_dir, 'results_multi_' + model_type + '.csv')
 
         result_ds = pd.DataFrame(result_array)
 

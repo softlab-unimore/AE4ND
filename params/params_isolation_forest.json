@@ -2,5 +2,5 @@
   "n_estimators": 100,
   "max_samples": 0.5,
   "max_features": 0.8,
-  "bootstrap": false
+  "bootstrap": true
 }
