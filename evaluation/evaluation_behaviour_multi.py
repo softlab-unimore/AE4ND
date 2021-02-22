@@ -61,12 +61,12 @@ def main():
         curr_files.append(files)
         test_files += files
 
-    max_size = min([len(files) for files in curr_files])
+    max_size = min([len(files) for files in curr_files[:3]])
 
     # Get train files where each element is a list of files for a single train
     train_files = []
     for i in range(max_size):
-        train_pack = [files[i] for files in curr_files]
+        train_pack = [files[i] for files in curr_files[:3]]
 
         for j in range(1, len(train_pack)):
             train_files.append(train_pack[:j + 1])
@@ -78,9 +78,10 @@ def main():
         train_states = []
         x_states = []
 
+        print('\n Train Pack')
         for train_file in train_pack:
             train_state = os.path.split(os.path.dirname(train_file))[-1]
-            print("\n State: ", train_state)
+            print("State: ", train_state)
             print("Read File: ", os.path.basename(train_file))
             ds_train = read_ds_lvm(train_file, get_header=False)
 
@@ -113,7 +114,8 @@ def main():
             x_states.append(x_train)
 
         x_states = np.vstack(x_states)
-        print('Train Size: ', x_states.shape)
+        print('\n Train Size: ', x_states.shape)
+        print('Train state: ', train_states)
 
         # Model initialization
         print("Model initialization: {}".format(model_type))
@@ -197,11 +199,10 @@ def main():
                 'PCT_ANOMALY': mean_error,
                 'NUM_SAMPLE_ANOMALY': mean_only_error,
                 'NUM_SAMPLE': len(x_test),
-                'LABEL': test_state in train_states
+                'LABEL': test_state not in train_states
             }
 
             result_array.append(result_record)
-
 
     if save_result:
         if not os.path.isdir(output_dir):

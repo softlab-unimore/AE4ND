@@ -1,6 +1,6 @@
 {
   "nu": 0.00001,
   "tol": 0.00001,
-  "kernel": "rbf",
+  "kernel": "sigmoid",
   "gamma": "auto"
 }
