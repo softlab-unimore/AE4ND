@@ -14,7 +14,7 @@ from transforms.transformer import get_transformer
 
 class DeepAutoEncoder(object):
 
-    def __init__(self, with_lazy=True, learning_rate=0.01):
+    def __init__(self, transformer_type='std', with_lazy=1, learning_rate=0.001):
         """ Deep AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None
@@ -27,7 +27,6 @@ class DeepAutoEncoder(object):
         self.history = None
         self.with_lazy = with_lazy
         self.threshold = 0
-        # self.lazy_threshold
 
     def _set_input(self, X):
         assert len(X.shape) == 2, 'Invalid input shape'
@@ -75,10 +74,8 @@ class DeepAutoEncoder(object):
         print("Average error: ", np.mean(train_mae_loss))
         print("Std error: ", np.std(train_mae_loss))
 
-        if self.with_lazy:
-            # threshold = threshold + np.std(train_mae_loss)
-            # iqr = np.quantile(train_mae_loss, 0.75) - np.quantile(train_mae_loss, 0.25)
-            threshold = threshold + 1
+        if self.with_lazy > 0:
+            threshold = threshold + self.with_lazy
             print("Use lazy reconstruction error threshold: ", threshold)
 
         self.threshold = np.max(threshold, self.threshold)
@@ -97,7 +94,7 @@ class DeepAutoEncoder(object):
             epochs=50,
             batch_size=128,
             validation_split=0.1,
-            verbose=0,
+            verbose=2,
             callbacks=[
                 keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, mode="min")
             ],

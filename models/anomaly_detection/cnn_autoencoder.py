@@ -12,7 +12,7 @@ from tensorflow.keras import layers
 
 class CNNAutoEncoder(object):
 
-    def __init__(self, with_lazy=True, learning_rate=0.01):
+    def __init__(self, with_lazy=True, learning_rate=0.001):
         """ CNN AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None
@@ -99,7 +99,7 @@ class CNNAutoEncoder(object):
             epochs=50,
             batch_size=128,
             validation_split=0.1,
-            verbose=0,
+            verbose=2,
             callbacks=[
                 keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, mode="min")
             ],

@@ -72,7 +72,7 @@ def main():
             train_files.append(train_pack[:j + 1])
 
     for train_pack in train_files:
-        print('\n' + '|\\-/|/-\\' * 10)
+        print('\n' + '\\\\//' * 20)
 
         selected_files = []
         train_states = []

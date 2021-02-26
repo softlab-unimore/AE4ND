@@ -104,7 +104,7 @@ def main():
     test_files = curr_files
 
     for train_file in curr_files:
-        print('\n' + '|\\-/|/-\\' * 10)
+        print('\n' + '\\\\//' * 20)
 
         train_state = os.path.split(os.path.dirname(train_file))[-1]
         print("\n State Train: ", train_state)
@@ -219,17 +219,16 @@ def main():
                 'PCT_ANOMALY': mean_error,
                 'NUM_SAMPLE_ANOMALY': mean_only_error,
                 'NUM_SAMPLE': len(x_test),
+                'LABEL': train_state != test_state
             }
 
             result_array.append(result_record)
-
-
 
     if save_result:
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir, exist_ok=True)
 
-        filename = os.path.join(output_dir, 'results_single' + model_type + '.csv')
+        filename = os.path.join(output_dir, 'results_single_' + model_type + '.csv')
 
         result_ds = pd.DataFrame(result_array)
 

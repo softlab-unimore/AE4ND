@@ -12,7 +12,7 @@ from tensorflow.keras import layers
 
 class LSTMAutoEncoder(object):
 
-    def __init__(self, with_lazy=False, learning_rate=0.01):
+    def __init__(self, with_lazy=True, learning_rate=0.001):
         """ LSTM AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None
@@ -39,14 +39,17 @@ class LSTMAutoEncoder(object):
             [
                 layers.Input(shape=(self.sequence_length, self.num_features)),
                 layers.LSTM(100, activation='relu', return_sequences=True),
-                layers.LSTM(64, activation='relu', return_sequences=False),
+                layers.LSTM(64, activation='relu', dropout=0.2, return_sequences=False),
                 layers.RepeatVector(self.sequence_length),
                 layers.LSTM(64, activation='relu', return_sequences=True),
-                layers.LSTM(100, activation='relu', return_sequences=True),
+                layers.LSTM(100, activation='relu', dropout=0.2, return_sequences=True),
                 layers.TimeDistributed(layers.Dense(self.num_features))
             ]
         )
-        model.compile(optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate), loss=self.loss)
+        optimizer = keras.optimizers.Adam(learning_rate=self.learning_rate,
+                                          clipnorm=1.0, clipvalue=0.5)
+        model.compile(optimizer=optimizer,
+                      loss=self.loss)
         # model.summary()
 
         self.model = model
