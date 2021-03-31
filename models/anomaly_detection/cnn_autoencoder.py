@@ -99,7 +99,7 @@ class CNNAutoEncoder(object):
             epochs=50,
             batch_size=128,
             validation_split=0.1,
-            verbose=2,
+            verbose=0,
             callbacks=[
                 keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, mode="min")
             ],
@@ -156,3 +156,5 @@ class CNNAutoEncoder(object):
         print("Mean distance from threshold: {:.05f}".format(np.mean(scores)))
 
         return scores
+
+

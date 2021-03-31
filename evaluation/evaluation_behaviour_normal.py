@@ -28,50 +28,6 @@ def get_argument():
     return params
 
 
-# Input files
-# curr_state_folder = r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 2'
-# test_state_folder = r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 3'
-#
-# all_state_folder = [
-#     r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 2',
-#     r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 3',
-#     r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 4',
-#     r'C:\Users\delbu\Projects\Dataset\Anomaly Detection\TEST 6 fail motore',
-# ]
-#
-# # Features
-# features_list = [
-#     "Acceleration_X1", "Acceleration_Y1", "Acceleration_Z1",
-#     # "Acceleration_X2", "Acceleration_Y2", "Acceleration_Z2",
-#     # "Acceleration_X3", "Acceleration_Y3", "Acceleration_Z3"
-# ]
-#
-# # Data preparation params
-# # kernel = 144  # 288
-# # stride = 77   # 77
-#
-# kernel = 288
-# stride = 77
-#
-# # start_sample = 500000
-# # num_sample = float('inf')
-# num_sample = 1000000
-#
-# train_step = 5
-# test_step = 5
-#
-# # max_test_step = 5000
-#
-# # Isolation Forest params
-# # model_type = 'setup_clustering'
-# model_type = 'cnn'
-# params_file = './params/params_{}.json'.format(model_type)
-#
-# save_result = True
-# overwrite = True
-# output_dir = './results'
-
-
 def main():
     params = get_argument()
     all_state_folder = params['all_state_folder']
