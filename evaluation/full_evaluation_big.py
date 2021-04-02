@@ -90,6 +90,11 @@ def main():
             print("\n State Train: ", train_state)
 
             for i in range(size):
+                if pos + i > len(curr_files):
+                    print('Not enough files')
+                    skip_step = True
+                    break
+
                 tmp_file = curr_files[pos + i]
                 tmp_state = os.path.split(os.path.dirname(tmp_file))[-1]
 
