@@ -12,7 +12,7 @@ from tensorflow.keras import layers
 
 class CNNAutoEncoder(object):
 
-    def __init__(self, with_lazy=True, learning_rate=0.001):
+    def __init__(self, with_lazy=True, learning_rate=0.0004):
         """ CNN AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None
@@ -84,7 +84,7 @@ class CNNAutoEncoder(object):
             # threshold = threshold + np.std(train_mae_loss)
             # iqr = np.quantile(train_mae_loss, 0.75) - np.quantile(train_mae_loss, 0.25)
             # threshold = threshold + 10 * iqr
-            threshold = threshold + 0.001
+            threshold = threshold + 0.0005
             print("Use lazy reconstruction error threshold: ", threshold)
 
         self.threshold = np.max(threshold, self.threshold)
@@ -96,12 +96,12 @@ class CNNAutoEncoder(object):
 
         history = self.model.fit(
             x=x, y=x,
-            epochs=50,
+            epochs=200,
             batch_size=128,
             validation_split=0.1,
-            verbose=0,
+            verbose=2,
             callbacks=[
-                keras.callbacks.EarlyStopping(monitor="val_loss", patience=10, mode="min")
+                keras.callbacks.EarlyStopping(monitor="val_loss", patience=20, mode="min")
             ],
         )
         self.history = history

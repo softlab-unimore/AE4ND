@@ -14,7 +14,7 @@ from transforms.transformer import get_transformer
 
 class DeepAutoEncoder(object):
 
-    def __init__(self, transformer_type='std', with_lazy=1, learning_rate=0.001):
+    def __init__(self, with_lazy=0.5, learning_rate=0.0004):
         """ Deep AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None
@@ -91,7 +91,7 @@ class DeepAutoEncoder(object):
 
         history = self.model.fit(
             x=x, y=x,
-            epochs=50,
+            epochs=200,
             batch_size=128,
             validation_split=0.1,
             verbose=0,

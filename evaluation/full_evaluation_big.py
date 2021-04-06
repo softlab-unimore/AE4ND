@@ -90,7 +90,7 @@ def main():
             print("\n State Train: ", train_state)
 
             for i in range(size):
-                if pos + i > len(curr_files):
+                if pos + i >= len(curr_files):
                     print('Not enough files')
                     skip_step = True
                     break

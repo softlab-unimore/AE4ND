@@ -72,6 +72,9 @@ def main():
             train_files.append(train_pack[:j + 1])
 
     for train_pack in train_files:
+        if len(train_pack) < 3:
+            continue
+
         print('\n' + '\\\\//' * 20)
 
         selected_files = []
@@ -131,6 +134,9 @@ def main():
 
             if test_file in selected_files:
                 continue
+
+            # if test_state in train_states:
+            #     continue
 
             print("\n State Test: ", test_state)
             print("Read Test File: ", os.path.basename(test_file))

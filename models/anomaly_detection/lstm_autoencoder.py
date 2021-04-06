@@ -12,7 +12,7 @@ from tensorflow.keras import layers
 
 class LSTMAutoEncoder(object):
 
-    def __init__(self, with_lazy=True, learning_rate=0.001):
+    def __init__(self, with_lazy=True, learning_rate=0.0004):
         """ LSTM AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None
@@ -82,7 +82,7 @@ class LSTMAutoEncoder(object):
         if self.with_lazy:
             # threshold = threshold + np.std(train_mae_loss)
             # iqr = np.quantile(train_mae_loss, 0.75) - np.quantile(train_mae_loss, 0.25)
-            threshold = threshold + 0.001
+            threshold = threshold + 0.0005
             print("Use lazy reconstruction error threshold: ", threshold)
 
         self.threshold = np.max(threshold, self.threshold)
@@ -94,7 +94,7 @@ class LSTMAutoEncoder(object):
 
         history = self.model.fit(
             x=x, y=x,
-            epochs=50,
+            epochs=100,
             batch_size=128,
             validation_split=0.1,
             verbose=0,
