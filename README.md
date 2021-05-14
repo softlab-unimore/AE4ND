@@ -28,7 +28,7 @@ to the participation of 7 companies.
 - Machine Learning: Predictive models to anticipate maintenance actions and breakdown
 
 
-## Machine Learning
+## Library
 
 ### Requirements
 
