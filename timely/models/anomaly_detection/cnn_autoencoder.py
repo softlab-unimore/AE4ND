@@ -16,6 +16,8 @@ class CNNAutoEncoder(object):
         self.learning_rate = learning_rate
         self.loss = 'mae'
 
+        self.model = None
+        self.encoder = None
         self.history = None
         self.with_lazy = with_lazy
         self.threshold = 0
@@ -26,30 +28,26 @@ class CNNAutoEncoder(object):
         self.num_features = x.shape[2]
 
     def _define_model(self, ):
-        model = keras.Sequential(
-            [
-                layers.Input(shape=(self.sequence_length, self.num_features)),
-                layers.Conv1D(
-                    filters=32, kernel_size=7, padding="same", strides=2, activation="relu"
-                ),
-                layers.Dropout(rate=0.2),
-                layers.Conv1D(
-                    filters=16, kernel_size=7, padding="same", strides=2, activation="relu"
-                ),
-                layers.Conv1DTranspose(
-                    filters=16, kernel_size=7, padding="same", strides=2, activation="relu"
-                ),
-                layers.Dropout(rate=0.2),
-                layers.Conv1DTranspose(
-                    filters=32, kernel_size=7, padding="same", strides=2, activation="relu"
-                ),
-                layers.Conv1DTranspose(filters=self.num_features, kernel_size=7, padding="same"),
-            ]
-        )
-        model.compile(optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate), loss=self.loss)
+        input_series = keras.Input(shape=(self.sequence_length, self.num_features))
+
+        x = layers.Conv1D(filters=32, kernel_size=7, padding="same", strides=2, activation="relu")(input_series)
+        x = layers.Dropout(rate=0.2)(x)
+        encoded = layers.Conv1D(filters=16, kernel_size=7, padding="same", strides=2, activation="relu")(x)
+
+        encoder = keras.Model(input_series, encoded)
+
+        x = layers.Conv1DTranspose(filters=16, kernel_size=7, padding="same", strides=2, activation="relu")(encoded)
+        x = layers.Dropout(rate=0.2)(x)
+        x = layers.Conv1DTranspose(filters=32, kernel_size=7, padding="same", strides=2, activation="relu")(x)
+        decoded = layers.Conv1DTranspose(filters=self.num_features, kernel_size=7, padding="same")(x)
+
+        autoencoder = keras.Model(input_series, decoded)
+
+        autoencoder.compile(optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate), loss=self.loss)
         # model.summary()
 
-        self.model = model
+        self.model = autoencoder
+        self.encoder = encoder
 
     def _compute_reconstruction_error(self, x, x_pred):
         x = x.reshape((len(x), -1))
@@ -86,10 +84,10 @@ class CNNAutoEncoder(object):
 
         history = self.model.fit(
             x=x, y=x,
-            epochs=200,
+            epochs=100,
             batch_size=128,
             validation_split=0.1,
-            verbose=2,
+            verbose=0,
             callbacks=[
                 keras.callbacks.EarlyStopping(monitor="val_loss", patience=20, mode="min")
             ],
@@ -133,7 +131,6 @@ class CNNAutoEncoder(object):
         # Detect all the samples which are anomalies.
         scores = test_mae_loss - self.threshold
         print("Number of anomaly samples: ", np.sum(scores > 0))
-
         print("Mean reconstruction error: {:.05f}".format(np.mean(test_mae_loss)))
         print("Mean distance from threshold: {:.05f}".format(np.mean(scores)))
 
