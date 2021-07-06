@@ -22,7 +22,7 @@
   "stride": 1,
   "resample_rate": 6400,
 
-  "model_type":  "cnn",
+  "model_type":  "deep",
 
   "with_decision_score":  false,
   "custom_resample":  false
