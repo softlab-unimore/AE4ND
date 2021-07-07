@@ -60,7 +60,7 @@ def prepare_data(ds_list, labels, kernel, stride=1):
 
 def main():
     params = get_argument()
-    all_state_folder = params['all_state_folder'][:3]
+    all_state_folder = params['all_state_folder']
     features_list = params['features_list']
     kernel = params['kernel']
     stride = params['stride']
@@ -157,7 +157,7 @@ def main():
                 os.makedirs(output_dir, exist_ok=True)
 
             filename = os.path.join(output_dir, 'results_anomaly_{}_{}_.csv'.format(selected_state_id, model_type))
-            ds_res.to_csv(filename, index=False)
+            ds_res.to_csv(filename, index=True)
 
         print("Locate Anomaly")
         x_selected = x_test[y_test == selected_state_id]

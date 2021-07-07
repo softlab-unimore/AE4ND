@@ -58,7 +58,7 @@ def prepare_data(ds_list, labels, kernel, stride=1):
 
 def main():
     params = get_argument()
-    all_state_folder = params['all_state_folder'][:3]
+    all_state_folder = params['all_state_folder']
     features_list = params['features_list']
     kernel = params['kernel']
     stride = params['stride']
