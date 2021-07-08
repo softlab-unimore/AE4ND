@@ -5,7 +5,9 @@ import pandas as pd
 def get_files(dir_name, ext='CSV'):
     """get file list in the given folder"""
     files = []
-    for file in os.listdir(dir_name):
+    file_list = os.listdir(dir_name)
+    file_list = sorted(file_list)
+    for file in file_list:
         if file.endswith(ext):
             files.append(os.path.join(dir_name, file))
     return files
