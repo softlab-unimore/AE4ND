@@ -209,7 +209,6 @@ def main():
             record.update(grid)
 
             ds_res.append(record)
-            break
 
         ds_res = pd.DataFrame(ds_res)
 
@@ -219,8 +218,6 @@ def main():
 
             filename = os.path.join(output_dir, 'results_grid_anomaly_{}_{}_.csv'.format(selected_state_id, model_type))
             ds_res.to_csv(filename, index=True)
-
-        break
 
 
 if __name__ == '__main__':
