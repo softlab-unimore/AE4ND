@@ -3,7 +3,7 @@
     "/Users/delbu/Projects/Dataset/Anomaly Detection/TEST 2",
     "/Users/delbu/Projects/Dataset/Anomaly Detection/TEST 3",
     "/Users/delbu/Projects/Dataset/Anomaly Detection/TEST 4",
-    "/Users/delbu/Projects/Dataset/Anomaly Detection/TEST 6 fail motore"
+    "/Users/delbu/Projects/Dataset/Anomaly Detection/TEST 6"
   ],
 
   "features_list": [
@@ -22,7 +22,7 @@
   "stride": 1,
   "resample_rate": 6400,
 
-  "model_type":  "deep",
+  "model_type":  "cnn",
 
   "with_decision_score":  false,
   "custom_resample":  false

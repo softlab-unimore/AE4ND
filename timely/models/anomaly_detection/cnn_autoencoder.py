@@ -8,7 +8,7 @@ from tensorflow.keras import layers, losses, metrics
 
 class CNNAutoEncoder(object):
 
-    def __init__(self, with_lazy=True, learning_rate=0.0004):
+    def __init__(self, activation='relu', loss='mae', learning_rate=0.0004, with_lazy=0.02):
         """ CNN AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None
@@ -16,7 +16,10 @@ class CNNAutoEncoder(object):
 
         # AutoEncoder alpha and loss
         self.learning_rate = learning_rate
-        self.loss = 'mae'
+        self.loss = loss
+
+        # AutoEncoder activation function
+        self.activation = activation
 
         # AutoEncoder and Classifier model
         self.model = None
@@ -41,15 +44,15 @@ class CNNAutoEncoder(object):
     def _define_model(self, ):
         input_series = keras.Input(shape=(self.sequence_length, self.num_features))
 
-        x = layers.Conv1D(filters=32, kernel_size=7, padding="same", strides=2, activation="relu")(input_series)
+        x = layers.Conv1D(filters=32, kernel_size=7, padding="same", strides=2, activation=self.activation)(input_series)
         x = layers.Dropout(rate=0.2)(x)
-        encoded = layers.Conv1D(filters=16, kernel_size=7, padding="same", strides=2, activation="relu")(x)
+        encoded = layers.Conv1D(filters=16, kernel_size=7, padding="same", strides=2, activation=self.activation)(x)
 
         encoder = keras.Model(input_series, encoded)
 
-        x = layers.Conv1DTranspose(filters=16, kernel_size=7, padding="same", strides=2, activation="relu")(encoded)
+        x = layers.Conv1DTranspose(filters=16, kernel_size=7, padding="same", strides=2, activation=self.activation)(encoded)
         x = layers.Dropout(rate=0.2)(x)
-        x = layers.Conv1DTranspose(filters=32, kernel_size=7, padding="same", strides=2, activation="relu")(x)
+        x = layers.Conv1DTranspose(filters=32, kernel_size=7, padding="same", strides=2, activation=self.activation)(x)
         decoded = layers.Conv1DTranspose(filters=self.num_features, kernel_size=7, padding="same")(x)
 
         autoencoder = keras.Model(input_series, decoded)
@@ -97,7 +100,7 @@ class CNNAutoEncoder(object):
         print("Reconstruction error threshold: ", threshold)
         print("Min error: ", np.min(train_mae_loss))
         print("Max error: ", np.max(train_mae_loss))
-        print("Average error: ", np.mean(train_mae_loss))
+        print("Avg error: ", np.mean(train_mae_loss))
         print("Std error: ", np.std(train_mae_loss))
 
         if self.with_lazy:
@@ -105,12 +108,12 @@ class CNNAutoEncoder(object):
             # iqr = np.quantile(train_mae_loss, 0.75) - np.quantile(train_mae_loss, 0.25)
             # threshold = threshold + 10 * iqr
             # threshold = threshold + 0.0005
-            threshold = threshold + 0.02
+            threshold = threshold + self.with_lazy
             print("Use lazy reconstruction error threshold: ", threshold)
 
         self.threshold = np.max(threshold, self.threshold)
 
-    def fit(self, x, y=None, verbose=0):
+    def fit(self, x, y=None, epochs=100, verbose=0):
         print('CNN AutoEncoder Fit')
         # Define autoencoder input params
         self._set_input(x)
@@ -121,7 +124,7 @@ class CNNAutoEncoder(object):
         # Train CNN AutoEncoder
         self.history = self.model.fit(
             x=x, y=x,
-            epochs=100,
+            epochs=epochs,
             batch_size=128,
             validation_split=0.1,
             verbose=verbose,

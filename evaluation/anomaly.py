@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.metrics import classification_report
 from sklearn.model_selection import ParameterGrid
 
-from tensorflow.keras.layers import LeakyReLU
+from tensorflow.keras import layers
 
 from timely.utils.manage_file import get_files, read_ds_lvm
 from timely.utils.tools import get_sliding_window_matrix
@@ -14,7 +14,6 @@ from timely.transforms.transformer import resample, get_transformer
 from timely.models.anomaly_detection.cnn_autoencoder import CNNAutoEncoder
 from timely.models.anomaly_detection.lstm_autoencoder import LSTMAutoEncoder
 from timely.models.anomaly_detection.deep_autoencoder import DeepAutoEncoder
-
 
 
 def get_argument():
@@ -69,15 +68,26 @@ def get_deep_model(model_type, model_params=None):
 
     print("Model initialization: ", model_type)
     if model_type == 'cnn':
-        model = CNNAutoEncoder(model_params)
+        model = CNNAutoEncoder(**model_params)
     elif model_type == 'lstm':
-        model = LSTMAutoEncoder(model_params)
+        model = LSTMAutoEncoder(**model_params)
     elif model_type == 'deep':
-        model = DeepAutoEncoder(model_params)
+        model = DeepAutoEncoder(**model_params)
     else:
         raise ValueError('{} does not exist'.format(model_type))
 
     return model
+
+
+def get_classification_report_record(report_dict):
+    res = {}
+    for k, val in report_dict.items():
+        if isinstance(val, dict):
+            for k_next, val_next in val.items():
+                res['{}__{}'.format(k, k_next)] = val_next
+        else:
+            res[k] = val
+    return res
 
 
 def main():
@@ -102,6 +112,13 @@ def main():
         'loss': 'mae'  # 'mae', 'mse'
     }
 
+    params_grid = {
+        'kernel': [40, 80, 120, 200],
+        'transform_type': ['minmax'],
+        'with_lazy': [0.00, 0.01, 0.015, 0.02],
+        'loss': ['mae', 'mse'],
+        'activation': [layers.LeakyReLU(alpha=0.3), 'relu', 'tanh']
+    }
 
     skip_list = [0]
     train_list = [1]
@@ -133,74 +150,66 @@ def main():
                     print('Test state {} file: {}'.format(state_id, filename))
                     y_test_list.append(state_id)
 
-
-        # Apply transform
-        transformer = None
-        if transform_type:
-            print('Apply transform: ', transform_type)
-            x_train_list, transformer = transform_data(ds_train_list, transform_type)
-            x_test_list = [apply_transform(ds, transformer) for ds in ds_test_list]
-
-        else:
-            print('No transform selected')
-            x_train_list = ds_train_list
-            x_test_list = ds_test_list
-
-        # Create train and test matrix set
-        x_train, y_train = prepare_data(x_train_list, labels=y_train_list, kernel=kernel, stride=stride)
-        x_test, y_test = prepare_data(x_test_list, labels=y_test_list, kernel=kernel, stride=stride)
-
-        print('Train size:       ', x_train.shape)
-        print('Train label size: ', y_train.shape)
-        print('Test size:        ', x_test.shape)
-        print('Test label size:  ', y_test.shape)
-
-        order = np.random.permutation(len(x_train))
-        x_new = x_train[order]
-        y_new = y_train[order]
-
-        # Model initialization
-        print("Model initialization: {}".format(model_type))
-        model = get_deep_model(model_type, model_params=model_params)
-
-        # Training
-        print("Training...")
-        model.fit(x=x_new, epochs=epochs, verbose=2)
-
-        print("Anomaly accuracy")
-        y_pred = model.predict(x_test, classifier=False)
-        y_true = np.zeros(len(y_test))
-        y_true[y_test == selected_state_id] = 1
-        print(classification_report(y_true, y_pred))
-
-        ds_res = pd.DataFrame(classification_report(y_true, y_pred, output_dict=True))
-
-        if save_result:
-            if not os.path.isdir(output_dir):
-                os.makedirs(output_dir, exist_ok=True)
-
-            filename = os.path.join(output_dir, 'results_anomaly_{}_{}_.csv'.format(selected_state_id, model_type))
-            ds_res.to_csv(filename, index=True)
-
-        print("Locate Anomaly")
-        x_selected = x_test[y_test == selected_state_id]
-        y_selected = y_test[y_test == selected_state_id]
-        x_reconstructed = model.model.predict(x_selected)
-
         ds_res = []
-        num_records = len(x_selected)
-        for i in range(num_records):
-            x_true = x_selected[i]
-            x_pred = x_reconstructed[i]
-            if transformer is not None:
-                x_true = transformer.inverse_transform(x_true)
-                x_pred = transformer.inverse_transform(x_pred)
+        for grid in ParameterGrid(params_grid):
 
-            diff = np.mean(np.abs(x_true - x_pred), axis=0)
-            res = {k: val for k, val in zip(features_list, diff)}
-            res['threshold'] = model.threshold
-            res['score'] = y_selected[i]
-            ds_res.append(res)
+            print('\n Params:')
+            print(grid)
+
+            kernel = grid['kernel']
+            transform_type = grid['transform_type']
+
+            model_params = {
+                'with_lazy': grid['with_lazy'],
+                'loss': grid['loss'],
+                'activation': grid['activation']
+            }
+
+            # Apply transform
+            transformer = None
+            if transform_type:
+                print('Apply transform: ', transform_type)
+                x_train_list, transformer = transform_data(ds_train_list, transform_type)
+                x_test_list = [apply_transform(ds, transformer) for ds in ds_test_list]
+
+            else:
+                print('No transform selected')
+                x_train_list = ds_train_list
+                x_test_list = ds_test_list
+
+            # Create train and test matrix set
+            x_train, y_train = prepare_data(x_train_list, labels=y_train_list, kernel=kernel, stride=stride)
+            x_test, y_test = prepare_data(x_test_list, labels=y_test_list, kernel=kernel, stride=stride)
+
+            print('Train size:       ', x_train.shape)
+            print('Train label size: ', y_train.shape)
+            print('Test size:        ', x_test.shape)
+            print('Test label size:  ', y_test.shape)
+
+            order = np.random.permutation(len(x_train))
+            x_new = x_train[order]
+            y_new = y_train[order]
+
+            # Model initialization
+            print("Model initialization: {}".format(model_type))
+            model = get_deep_model(model_type, model_params=model_params)
+
+            # Training
+            print("Training...")
+            model.fit(x=x_new, epochs=epochs, verbose=2)
+
+            print("Anomaly accuracy")
+            y_pred = model.predict(x_test, classifier=False)
+            y_true = np.zeros(len(y_test))
+            y_true[y_test == selected_state_id] = 1
+            print(classification_report(y_true, y_pred))
+
+            report_dict = classification_report(y_true, y_pred, output_dict=True)
+            record = get_classification_report_record(report_dict)
+            record.update(grid)
+
+            ds_res.append(record)
+            break
 
         ds_res = pd.DataFrame(ds_res)
 
@@ -208,8 +217,10 @@ def main():
             if not os.path.isdir(output_dir):
                 os.makedirs(output_dir, exist_ok=True)
 
-            filename = os.path.join(output_dir, 'results_locate_{}_{}_.csv'.format(selected_state_id, model_type))
-            ds_res.to_csv(filename, index=False)
+            filename = os.path.join(output_dir, 'results_grid_anomaly_{}_{}_.csv'.format(selected_state_id, model_type))
+            ds_res.to_csv(filename, index=True)
+
+        break
 
 
 if __name__ == '__main__':

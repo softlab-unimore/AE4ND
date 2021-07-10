@@ -9,7 +9,7 @@ from tensorflow.keras import layers, losses, metrics
 
 class DeepAutoEncoder(object):
 
-    def __init__(self, with_lazy=True, learning_rate=0.0004):
+    def __init__(self, activation='tanh', loss='mae', learning_rate=0.0004, with_lazy=0.02):
         """ Deep AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None
@@ -17,7 +17,10 @@ class DeepAutoEncoder(object):
 
         # AutoEncoder alpha and loss
         self.learning_rate = learning_rate
-        self.loss = 'mae'
+        self.loss = loss
+
+        # AutoEncoder activation function
+        self.activation = activation
 
         # AutoEncoder and Classifier model
         self.model = None
@@ -42,33 +45,19 @@ class DeepAutoEncoder(object):
     def _define_model(self, ):
         input_series = keras.Input(shape=(self.sequence_length, self.num_features))
 
-        # model = keras.Sequential(
-        #     [
-        #         layers.Input(shape=self.num_features),
-        #         layers.Dense(96, activation='tanh'),
-        #         layers.Dropout(rate=0.2),
-        #         layers.Dense(64, activation='tanh'),
-        #         layers.Dense(32, activation='tanh'),
-        #         layers.Dense(64, activation='tanh'),
-        #         layers.Dropout(rate=0.2),
-        #         layers.Dense(96, activation='tanh'),
-        #         layers.Dense(self.num_features),
-        #     ]
-        # )
-
         # Deep encoder
         x = layers.Flatten()(input_series)
-        x = layers.Dense(200, activation='tanh')(x)
+        x = layers.Dense(200, activation=self.activation)(x)
         x = layers.Dropout(rate=0.2)(x)
-        x = layers.Dense(100, activation='tanh')(x)
-        encoded = layers.Dense(100, activation='tanh')(x)
+        x = layers.Dense(100, activation=self.activation)(x)
+        encoded = layers.Dense(100, activation=self.activation)(x)
 
         encoder = keras.Model(input_series, encoded)
 
         # Deep decoder
-        x = layers.Dense(100, activation='tanh')(encoded)
+        x = layers.Dense(100, activation=self.activation)(encoded)
         x = layers.Dropout(rate=0.2)(x)
-        x = layers.Dense(200, activation='tanh')(x)
+        x = layers.Dense(200, activation=self.activation)(x)
         x = layers.Dense(self.num_features * self.sequence_length)(x)
         decoded = layers.Reshape((self.sequence_length, self.num_features))(x)
 
@@ -117,7 +106,7 @@ class DeepAutoEncoder(object):
         print("Reconstruction error threshold: ", threshold)
         print("Min error: ", np.min(train_mae_loss))
         print("Max error: ", np.max(train_mae_loss))
-        print("Average error: ", np.mean(train_mae_loss))
+        print("Avg error: ", np.mean(train_mae_loss))
         print("Std error: ", np.std(train_mae_loss))
 
         if self.with_lazy:
@@ -125,12 +114,12 @@ class DeepAutoEncoder(object):
             # iqr = np.quantile(train_mae_loss, 0.75) - np.quantile(train_mae_loss, 0.25)
             # threshold = threshold + 10 * iqr
             # threshold = threshold + 0.0005
-            threshold = threshold + 0.02
+            threshold = threshold + self.with_lazy
             print("Use lazy reconstruction error threshold: ", threshold)
 
         self.threshold = np.max(threshold, self.threshold)
 
-    def fit(self, x, y=None, verbose=0):
+    def fit(self, x, y=None, epochs=100, verbose=0):
         print('Deep AutoEncoder Fit')
         # Define autoencoder input params
         self._set_input(x)
@@ -141,7 +130,7 @@ class DeepAutoEncoder(object):
         # Train Deep AutoEncoder
         self.history = self.model.fit(
             x=x, y=x,
-            epochs=100,
+            epochs=epochs,
             batch_size=128,
             validation_split=0.1,
             verbose=verbose,
