@@ -114,6 +114,9 @@ def main():
         'activation': [layers.LeakyReLU(alpha=0.3), 'relu', 'tanh']
     }
 
+    if model_type == 'bilstm':
+        params_grid['activation'] = ['relu', 'tanh']
+
     skip_list = [0]
     train_list = [1]
     for selected_state_id, selected_state in enumerate(all_state_folder):
@@ -127,7 +130,7 @@ def main():
         for state_id, folder in enumerate(all_state_folder):
             print('Read state: ', os.path.basename(folder))
             files = get_files(folder, ext='lvm')
-            for i, filename in enumerate(files):
+            for i, filename in enumerate(files[:3]):
                 if i in skip_list:
                     print('Skip: ', filename)
                     continue

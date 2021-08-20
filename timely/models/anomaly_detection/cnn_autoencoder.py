@@ -8,7 +8,7 @@ from tensorflow.keras import layers, losses, metrics
 
 class CNNAutoEncoder(object):
 
-    def __init__(self, activation='relu', loss='mae', learning_rate=0.0004, with_lazy=0.02):
+    def __init__(self, activation='relu', loss='mse', learning_rate=0.0004, with_lazy=0.02):
         """ CNN AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None

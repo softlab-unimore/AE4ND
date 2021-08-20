@@ -9,7 +9,7 @@ from tensorflow.keras import layers, losses, metrics
 
 class DeepAutoEncoder(object):
 
-    def __init__(self, activation='tanh', loss='mae', learning_rate=0.0004, with_lazy=0.02):
+    def __init__(self, activation='tanh', loss='mse', learning_rate=0.0004, with_lazy=0.02):
         """ Deep AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None
@@ -60,8 +60,6 @@ class DeepAutoEncoder(object):
         x = layers.Dense(200, activation=self.activation)(x)
         x = layers.Dense(self.num_features * self.sequence_length)(x)
         decoded = layers.Reshape((self.sequence_length, self.num_features))(x)
-
-        layers.concatenate([decoded, encoded])
 
         autoencoder = keras.Model(input_series, decoded)
 
