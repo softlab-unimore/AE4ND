@@ -66,6 +66,8 @@ def main():
     kernel = 80
     stride = 1
 
+    epochs = 500
+
     transform_type = 'minmax'
 
     save_result = True
@@ -132,7 +134,7 @@ def main():
 
     # Training
     print("Training...")
-    model.fit(x=x_new, y=y_new, epochs=300, verbose=2)
+    model.fit(x=x_new, y=y_new, epochs=epochs, verbose=2)
 
     y_pred = model.predict(x_test, classifier=True)
 
