@@ -128,25 +128,26 @@ def main():
     x_new = x_train[order]
     y_new = y_train[order]
 
-    # Model initialization
-    print("Model initialization: {}".format(model_type))
-    model = get_model(model_type)
+    for model_type in ['classifier', 'linear', 'cnn', 'deep', 'lstm', 'bilstm']:
+        # Model initialization
+        print("Model initialization: {}".format(model_type))
+        model = get_model(model_type)
 
-    # Training
-    print("Training...")
-    model.fit(x=x_new, y=y_new, epochs=epochs, verbose=2)
+        # Training
+        print("Training...")
+        model.fit(x=x_new, y=y_new, epochs=epochs, verbose=2)
 
-    y_pred = model.predict(x_test, classifier=True)
+        y_pred = model.predict(x_test, classifier=True)
 
-    print(classification_report(y_test, y_pred))
-    ds_res = pd.DataFrame(classification_report(y_test, y_pred, output_dict=True))
+        print(classification_report(y_test, y_pred))
+        ds_res = pd.DataFrame(classification_report(y_test, y_pred, output_dict=True))
 
-    if save_result:
-        if not os.path.isdir(output_dir):
-            os.makedirs(output_dir, exist_ok=True)
+        if save_result:
+            if not os.path.isdir(output_dir):
+                os.makedirs(output_dir, exist_ok=True)
 
-        filename = os.path.join(output_dir, 'results_accuracy_' + model_type + '.csv')
-        ds_res.to_csv(filename, index=True)
+            filename = os.path.join(output_dir, 'results_accuracy_' + model_type + '.csv')
+            ds_res.to_csv(filename, index=True)
 
 
 if __name__ == '__main__':
