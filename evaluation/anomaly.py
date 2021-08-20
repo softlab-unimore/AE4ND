@@ -13,6 +13,7 @@ from timely.utils.tools import get_sliding_window_matrix
 from timely.transforms.transformer import resample, get_transformer
 from timely.models.anomaly_detection.cnn_autoencoder import CNNAutoEncoder
 from timely.models.anomaly_detection.lstm_autoencoder import LSTMAutoEncoder
+from timely.models.anomaly_detection.bilstm_autoencoder import BiLSTMAutoEncoder
 from timely.models.anomaly_detection.deep_autoencoder import DeepAutoEncoder
 
 
@@ -71,6 +72,8 @@ def get_deep_model(model_type, model_params=None):
         model = CNNAutoEncoder(**model_params)
     elif model_type == 'lstm':
         model = LSTMAutoEncoder(**model_params)
+    elif model_type == 'bilstm':
+        model = BiLSTMAutoEncoder(**model_params)
     elif model_type == 'deep':
         model = DeepAutoEncoder(**model_params)
     else:
@@ -97,25 +100,16 @@ def main():
     model_type = params['model_type']
     resample_rate = 6400
 
-    kernel = 80  # 40, 80, 120, 200
     stride = 1
-    # model_type = 'cnn'        # 'cnn', 'deep', 'lstm'
-    transform_type = 'minmax'  # 'std', 'minmax', None
-
-    epochs = 100
+    epochs = 200
 
     save_result = True
     output_dir = './results'
 
-    model_params = {
-        'with_lazy': 0.02,  # 0.00, 0.01, 0.015, 0.02
-        'loss': 'mae'  # 'mae', 'mse'
-    }
-
     params_grid = {
         'kernel': [40, 80, 120, 200],
         'transform_type': ['minmax'],
-        'with_lazy': [0.00, 0.01, 0.015, 0.02],
+        'with_lazy': [0.00],  # , 0.01, 0.015, 0.02],
         'loss': ['mae', 'mse'],
         'activation': [layers.LeakyReLU(alpha=0.3), 'relu', 'tanh']
     }
@@ -135,6 +129,7 @@ def main():
             files = get_files(folder, ext='lvm')
             for i, filename in enumerate(files):
                 if i in skip_list:
+                    print('Skip: ', filename)
                     continue
 
                 ds = read_ds_lvm(filename, get_header=False)
@@ -198,17 +193,25 @@ def main():
             print("Training...")
             model.fit(x=x_new, epochs=epochs, verbose=2)
 
-            print("Anomaly accuracy")
-            y_pred = model.predict(x_test, classifier=False)
-            y_true = np.zeros(len(y_test))
-            y_true[y_test == selected_state_id] = 1
-            print(classification_report(y_true, y_pred))
+            original_threshold = model.threshold
+            print('Anomaly threshold: ', original_threshold)
 
-            report_dict = classification_report(y_true, y_pred, output_dict=True)
-            record = get_classification_report_record(report_dict)
-            record.update(grid)
+            for th in [0.00, 0.01, 0.015, 0.02]:
+                model.threshold = original_threshold + th
 
-            ds_res.append(record)
+                print('\n Lazy ', model.threshold)
+                print("Anomaly accuracy")
+                y_pred = model.predict(x_test, classifier=False)
+                y_true = np.zeros(len(y_test))
+                y_true[y_test == selected_state_id] = 1
+                print(classification_report(y_true, y_pred))
+
+                report_dict = classification_report(y_true, y_pred, output_dict=True)
+                record = get_classification_report_record(report_dict)
+                record.update(grid)
+                record['with_lazy'] = model.threshold
+
+                ds_res.append(record)
 
         ds_res = pd.DataFrame(ds_res)
 

@@ -60,14 +60,12 @@ def main():
     params = get_argument()
     all_state_folder = params['all_state_folder']
     features_list = params['features_list']
-    kernel = params['kernel']
-    stride = params['stride']
     model_type = params['model_type']
     resample_rate = 6400
 
     kernel = 80
     stride = 1
-    # model_type = 'cnn'
+
     transform_type = 'minmax'
 
     save_result = True
@@ -83,9 +81,11 @@ def main():
     # Read train and test files
     print('Read all datasets')
     for state_id, folder in enumerate(all_state_folder):
+        print('\nRead state: ', os.path.basename(folder))
         files = get_files(folder, ext='lvm')
         for i, filename in enumerate(files):
             if i in skip_list:
+                print('Skip:               {}'.format(filename))
                 continue
 
             ds = read_ds_lvm(filename, get_header=False)
@@ -93,14 +93,16 @@ def main():
             ds = resample(ds, resample_rate)
 
             if i in train_list:
+                print('Train state {} file: {}'.format(state_id, filename))
                 ds_train_list.append(ds)
                 y_train_list.append(state_id)
             else:
+                print('Test state {} file:  {}'.format(state_id, filename))
                 ds_test_list.append(ds)
                 y_test_list.append(state_id)
 
     # Apply transform
-        transformer = None
+    transformer = None
     if transform_type:
         print('Apply transform: ', transform_type)
         x_train_list, transformer = transform_data(ds_train_list, transform_type)
@@ -130,7 +132,7 @@ def main():
 
     # Training
     print("Training...")
-    model.fit(x=x_new, y=y_new, verbose=2)
+    model.fit(x=x_new, y=y_new, epochs=300, verbose=2)
 
     y_pred = model.predict(x_test, classifier=True)
 

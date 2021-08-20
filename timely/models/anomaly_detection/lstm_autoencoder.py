@@ -146,7 +146,7 @@ class LSTMAutoEncoder(object):
             # Train Classifier
             self.history_classifier = self.classifier.fit(
                 x=x, y=y,
-                epochs=50,
+                epochs=epochs,
                 batch_size=128,
                 validation_split=0.1,
                 verbose=verbose,

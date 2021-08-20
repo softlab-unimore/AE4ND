@@ -7,7 +7,7 @@ from tensorflow import keras
 from tensorflow.keras import layers, losses, metrics
 
 
-class DeepAutoEncoder(object):
+class DeepClassifier(object):
 
     def __init__(self, learning_rate=0.0004):
         """ Deep AutoEncoder models for anomaly detection """
@@ -64,7 +64,7 @@ class DeepAutoEncoder(object):
 
         self.classifier.summary()
 
-    def fit(self, x, y=None, verbose=0):
+    def fit(self, x, y, verbose=0, **kwargs):
         print('Deep AutoEncoder Fit')
         # Define autoencoder input params
         self._set_input(x)
@@ -88,7 +88,7 @@ class DeepAutoEncoder(object):
             ],
         )
 
-    def predict(self, x):
+    def predict(self, x, **kwargs):
         print('Deep Predict')
         # Classifier prediction
         assert self.classifier is not None, 'Please train the classifier'

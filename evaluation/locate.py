@@ -69,11 +69,11 @@ def get_deep_model(model_type, model_params=None):
 
     print("Model initialization: ", model_type)
     if model_type == 'cnn':
-        model = CNNAutoEncoder(model_params)
+        model = CNNAutoEncoder(**model_params)
     elif model_type == 'lstm':
-        model = LSTMAutoEncoder(model_params)
+        model = LSTMAutoEncoder(**model_params)
     elif model_type == 'deep':
-        model = DeepAutoEncoder(model_params)
+        model = DeepAutoEncoder(**model_params)
     else:
         raise ValueError('{} does not exist'.format(model_type))
 
@@ -101,7 +101,6 @@ def main():
         'with_lazy': 0.02,  # 0.00, 0.01, 0.015, 0.02
         'loss': 'mae'  # 'mae', 'mse'
     }
-
 
     skip_list = [0]
     train_list = [1]
@@ -210,6 +209,8 @@ def main():
 
             filename = os.path.join(output_dir, 'results_locate_{}_{}_.csv'.format(selected_state_id, model_type))
             ds_res.to_csv(filename, index=False)
+
+        break
 
 
 if __name__ == '__main__':

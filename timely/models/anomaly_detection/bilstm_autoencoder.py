@@ -1,16 +1,15 @@
 """
-The implementation of Deep AutoEncoder models for anomaly detection.
+The implementation of LSTM AutoEncoder models for anomaly detection.
 """
-
 import numpy as np
 from tensorflow import keras
 from tensorflow.keras import layers, losses, metrics
 
 
-class DeepAutoEncoder(object):
+class BiLSTMAutoEncoder(object):
 
     def __init__(self, activation='tanh', loss='mae', learning_rate=0.0004, with_lazy=0.02):
-        """ Deep AutoEncoder models for anomaly detection """
+        """ BiLSTM AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None
         self.num_class = None
@@ -45,28 +44,23 @@ class DeepAutoEncoder(object):
     def _define_model(self, ):
         input_series = keras.Input(shape=(self.sequence_length, self.num_features))
 
-        # Deep encoder
-        x = layers.Flatten()(input_series)
-        x = layers.Dense(200, activation=self.activation)(x)
-        x = layers.Dropout(rate=0.2)(x)
-        x = layers.Dense(100, activation=self.activation)(x)
-        encoded = layers.Dense(100, activation=self.activation)(x)
+        # BiLSTM encoder
+        x = layers.Bidirectional(layers.LSTM(200, activation=self.activation, return_sequences=True))(input_series)
+        encoded = layers.Bidirectional(
+            layers.LSTM(100, activation=self.activation, dropout=0.2, return_sequences=False))(x)
 
         encoder = keras.Model(input_series, encoded)
 
-        # Deep decoder
-        x = layers.Dense(100, activation=self.activation)(encoded)
-        x = layers.Dropout(rate=0.2)(x)
-        x = layers.Dense(200, activation=self.activation)(x)
-        x = layers.Dense(self.num_features * self.sequence_length)(x)
-        decoded = layers.Reshape((self.sequence_length, self.num_features))(x)
-
-        layers.concatenate([decoded, encoded])
+        # BiLSTM decoder
+        x = layers.RepeatVector(self.sequence_length)(encoded)
+        x = layers.Bidirectional(layers.LSTM(100, activation=self.activation, return_sequences=True))(x)
+        x = layers.Bidirectional(layers.LSTM(200, activation=self.activation, return_sequences=True))(x)
+        x = layers.TimeDistributed(layers.Dense(16))(x)
+        decoded = layers.TimeDistributed(layers.Dense(self.num_features))(x)
 
         autoencoder = keras.Model(input_series, decoded)
 
         autoencoder.compile(optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate), loss=self.loss)
-        # model.summary()
 
         self.model = autoencoder
         self.encoder = encoder
@@ -122,14 +116,14 @@ class DeepAutoEncoder(object):
         self.threshold = np.max(threshold, self.threshold)
 
     def fit(self, x, y=None, epochs=100, verbose=0):
-        print('Deep AutoEncoder Fit')
+        print('BiLSTM AutoEncoder Fit')
         # Define autoencoder input params
         self._set_input(x)
 
         # Construct the model for the given input
         self._define_model()
 
-        # Train Deep AutoEncoder
+        # Train LSTM AutoEncoder
         self.history = self.model.fit(
             x=x, y=x,
             epochs=epochs,
@@ -166,7 +160,7 @@ class DeepAutoEncoder(object):
         pass
 
     def predict(self, x, classifier=False):
-        print('Deep AutoEncoder Predict')
+        print('BiLSTM AutoEncoder Predict')
         if classifier:
             # Classifier prediction
             assert self.classifier is not None, 'Please train the classifier'
@@ -192,7 +186,7 @@ class DeepAutoEncoder(object):
             return anomalies
 
     def decision_score(self, x):
-        print('Deep AutoEncoder Decision Score')
+        print('BiLSTM AutoEncoder Decision Score')
         # AutoEncoder reconstruction
         x_pred = self.model.predict(x)
 
