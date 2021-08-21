@@ -130,7 +130,7 @@ def main():
         for state_id, folder in enumerate(all_state_folder):
             print('Read state: ', os.path.basename(folder))
             files = get_files(folder, ext='lvm')
-            for i, filename in enumerate(files[:3]):
+            for i, filename in enumerate(files):
                 if i in skip_list:
                     print('Skip: ', filename)
                     continue
