@@ -5,10 +5,13 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import classification_report
 
+from sklearn.metrics.cluster import adjusted_mutual_info_score, adjusted_rand_score, homogeneity_score
+from sklearn.cluster import AgglomerativeClustering, KMeans, SpectralClustering
+
 from timely.utils.manage_model import get_model
 from timely.utils.manage_file import get_files, read_ds_lvm
 from timely.utils.tools import get_sliding_window_matrix
-from timely.transforms.transformer import resample, resample_with_feature_extractor, get_transformer
+from timely.transforms.transformer import resample, get_transformer
 
 
 def get_argument():
@@ -65,10 +68,16 @@ def main():
     stride = 1
     epochs = 500
 
-    transform_type = None # 'minmax'
+    transform_type = 'minmax'
 
     save_result = True
     output_dir = './results'
+
+    cluster_models = {
+        'agglomerative': AgglomerativeClustering,
+        'kmeans': KMeans,
+        'spectral': SpectralClustering
+    }
 
     for train_id in [1, 2]:
         skip_list = []
@@ -134,7 +143,40 @@ def main():
             x_new = x_train[order]
             y_new = y_train[order]
 
-            for model_type in ['linear', 'classifier']:
+            record = {}
+            for cluster_name, cluster_model in cluster_models.items():
+                print('\n', cluster_name)
+
+                cls = cluster_model(n_clusters=4)
+
+                enc_pred = x_test.reshape(len(x_test), -1)
+
+                print(enc_pred.shape)
+
+                y_pred = cls.fit_predict(enc_pred)
+
+                ami = adjusted_mutual_info_score(y_test, y_pred)
+                r_score = adjusted_rand_score(y_test, y_pred)
+                hom_score = homogeneity_score(y_test, y_pred)
+
+                record[cluster_name] = {
+                    'adjusted_mutual_info_score': ami,
+                    'adjusted_rand_score': r_score,
+                    'homogenity_score': hom_score
+                }
+
+                print(record[cluster_name])
+
+            ds_res = pd.DataFrame(record)
+            if save_result:
+                if not os.path.isdir(output_dir):
+                    os.makedirs(output_dir, exist_ok=True)
+
+                filename = os.path.join(output_dir, 'results_{}_cluster_{}_{}.csv'.format(train_id, 'raw', kernel))
+                ds_res.to_csv(filename, index=True)
+
+
+            for model_type in ['cnn', 'deep', 'lstm', 'bilstm']:
 
                 # Model initialization
                 print("Model initialization: {}".format(model_type))
@@ -142,18 +184,36 @@ def main():
 
                 # Training
                 print("Training...")
-                model.fit(x=x_new, y=y_new, epochs=epochs, verbose=2)
+                model.fit(x=x_new, epochs=epochs, verbose=2)
 
-                y_pred = model.predict(x_test, classifier=True)
+                enc_pred = model.encoder.predict(x_test)
+                enc_pred = enc_pred.reshape((len(x_test), -1))
 
-                print(classification_report(y_test, y_pred))
-                ds_res = pd.DataFrame(classification_report(y_test, y_pred, output_dict=True))
+                record = {}
+                for cluster_name, cluster_model in cluster_models.items():
+                    print('\n', cluster_name)
+                    print(enc_pred.shape)
 
+                    cls = cluster_model(n_clusters=4)
+                    y_pred = cls.fit_predict(enc_pred)
+
+                    ami = adjusted_mutual_info_score(y_test, y_pred)
+                    r_score = adjusted_rand_score(y_test, y_pred)
+                    hom_score = homogeneity_score(y_test, y_pred)
+
+                    record[cluster_name] = {
+                        'adjusted_mutual_info_score': ami,
+                        'adjusted_rand_score': r_score,
+                        'homogenity_score': hom_score
+                    }
+                    print(record[cluster_name])
+
+                ds_res = pd.DataFrame(record)
                 if save_result:
                     if not os.path.isdir(output_dir):
                         os.makedirs(output_dir, exist_ok=True)
 
-                    filename = os.path.join(output_dir, 'results_{}_accuracy_{}_{}.csv'.format(train_id, model_type, kernel))
+                    filename = os.path.join(output_dir, 'results_{}_cluster_{}_{}.csv'.format(train_id, model_type, kernel))
                     ds_res.to_csv(filename, index=True)
 
 
