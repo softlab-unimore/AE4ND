@@ -8,7 +8,7 @@ from tensorflow.keras import layers, losses, metrics
 
 class LSTMAutoEncoder(object):
 
-    def __init__(self, activation='tanh', loss='mae', learning_rate=0.0004, with_lazy=0.02):
+    def __init__(self, activation='tanh', loss='mse', learning_rate=0.0004, with_lazy=0.02):
         """ LSTM AutoEncoder models for anomaly detection """
         self.sequence_length = None
         self.num_features = None
@@ -59,7 +59,8 @@ class LSTMAutoEncoder(object):
 
         autoencoder = keras.Model(input_series, decoded)
 
-        autoencoder.compile(optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate), loss=self.loss)
+        optimizer = keras.optimizers.Adam(learning_rate=self.learning_rate, clipnorm=1.0, clipvalue=0.5)
+        autoencoder.compile(optimizer=optimizer, loss=self.loss)
 
         self.model = autoencoder
         self.encoder = encoder

@@ -119,7 +119,7 @@ def main():
             x_train_list = ds_train_list
             x_test_list = ds_test_list
 
-        for kernel in [40, 80, 120, 200]:
+        for kernel in [40, 80, 120, 200, 240, 360]:
 
             # Create train and test matrix set
             x_train, y_train = prepare_data(x_train_list, labels=y_train_list, kernel=kernel, stride=stride)
@@ -134,7 +134,7 @@ def main():
             x_new = x_train[order]
             y_new = y_train[order]
 
-            for model_type in ['linear', 'classifier']:
+            for model_type in ['linear', 'classifier', 'cnn', 'deep', 'lstm', 'bilstm']:
 
                 # Model initialization
                 print("Model initialization: {}".format(model_type))

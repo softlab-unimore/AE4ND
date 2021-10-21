@@ -58,7 +58,7 @@ class IsolationForest(object):
                              contamination=contamination,
                              max_features=max_features, **kwargs)
 
-    def fit(self, x):
+    def fit(self, x, **kwargs):
         """
         Arguments
         ---------
@@ -69,7 +69,7 @@ class IsolationForest(object):
         x = x.reshape((len(x), -1))
         self.model.fit(x)
 
-    def predict(self, x):
+    def predict(self, x, **kwargs):
         """ Predict anomalies with mined invariants
         Arguments
         ---------

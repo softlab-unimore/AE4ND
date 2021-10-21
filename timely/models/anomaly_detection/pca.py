@@ -14,7 +14,7 @@ import numpy as np
 
 class PCA(object):
 
-    def __init__(self, n_components=0.95, threshold=None, c_alpha=3.2905):
+    def __init__(self, n_components=0.95, threshold=5, c_alpha=3.2905):
         """
         The PCA models for anomaly detection
         Arguments
@@ -41,7 +41,7 @@ class PCA(object):
         self.threshold = threshold
         self.c_alpha = c_alpha
 
-    def fit(self, X):
+    def fit(self, x, **kwargs):
         """
         Auguments
         ---------
@@ -49,10 +49,10 @@ class PCA(object):
         """
 
         print('PCA Fit ')
-        X = X.reshape((len(X), -1))
-        num_instances, num_events = X.shape
-        X_cov = np.dot(X.T, X) / float(num_instances)
-        U, sigma, V = np.linalg.svd(X_cov)
+        x = x.reshape((len(x), -1))
+        num_instances, num_events = x.shape
+        x_cov = np.dot(x.T, x) / float(num_instances)
+        U, sigma, V = np.linalg.svd(x_cov)
         n_components = self.n_components
         if n_components < 1:
             total_variance = np.sum(sigma)
@@ -83,9 +83,9 @@ class PCA(object):
                                                1.0 / h0)
         print('SPE threshold: {}\n'.format(self.threshold))
 
-    def predict(self, X):
+    def predict(self, x, **kwargs):
         print('PCA Predict')
-        X = X.reshape((len(X), -1))
+        X = x.reshape((len(x), -1))
         assert self.proj_C is not None  # PCA models needs to be trained before prediction.
         y_pred = np.zeros(X.shape[0])
         for i in range(X.shape[0]):

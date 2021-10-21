@@ -128,7 +128,7 @@ def main():
             x_train_list = ds_train_list
             x_test_list = ds_test_list
 
-        for kernel in [40, 80, 120, 200]:
+        for kernel in [40, 80, 120, 200, 240, 360]:
 
             # Create train and test matrix set
             x_train, y_train = prepare_data(x_train_list, labels=y_train_list, kernel=kernel, stride=stride)

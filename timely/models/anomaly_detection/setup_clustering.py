@@ -14,7 +14,7 @@ from ...transforms.transformer import get_transformer
 
 class SetupClustering(object):
 
-    def __init__(self, max_distance=0.3, anomaly_threshold=0.3, distance='cosine', transformer='',
+    def __init__(self, max_distance=0.05, anomaly_threshold=0.05, distance='mae', transformer='',
                  mode='online', num_bootstrap_samples=5000):
         """
         Attributes
@@ -50,10 +50,12 @@ class SetupClustering(object):
             return 'cosine'
         elif distance == 'dtw':
             return 'dtw'
+        elif distance == 'mae':
+            return 'mae'
         else:
             raise ValueError('select the wrong distance metric')
 
-    def fit(self, x):
+    def fit(self, x, **kwargs):
         print('SetupClustering Fit')
         print('Distance Measure: ', self.distance)
         x = x.reshape((len(x), -1))
@@ -77,7 +79,7 @@ class SetupClustering(object):
             if x.shape[0] > self.num_bootstrap_samples:
                 self._online_clustering(x)
 
-    def predict(self, x):
+    def predict(self, x, **kwargs):
         print('SetupClustering Predict')
         x = x.reshape((len(x), -1))
 
@@ -167,6 +169,8 @@ class SetupClustering(object):
     def _distance_metric(self, x1, x2):
         if self.distance == 'euclidean':
             distance = euclidean(x1, x2)
+        elif self.distance == 'mae':
+            distance = np.sum(np.abs(x1 - x2)) / len(x1)
         elif self.distance == 'cosine':
             distance = self._cosine_metric(x1, x2)
         elif self.distance == 'dtw':

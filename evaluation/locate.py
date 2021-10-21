@@ -12,9 +12,9 @@ from timely.utils.manage_file import get_files, read_ds_lvm
 from timely.utils.tools import get_sliding_window_matrix
 from timely.transforms.transformer import resample, get_transformer
 from timely.models.anomaly_detection.cnn_autoencoder import CNNAutoEncoder
-from timely.models.anomaly_detection.lstm_autoencoder import LSTMAutoEncoder
 from timely.models.anomaly_detection.deep_autoencoder import DeepAutoEncoder
-
+from timely.models.anomaly_detection.lstm_autoencoder import LSTMAutoEncoder
+from timely.models.anomaly_detection.bilstm_autoencoder import BiLSTMAutoEncoder
 
 
 def get_argument():
@@ -70,10 +70,12 @@ def get_deep_model(model_type, model_params=None):
     print("Model initialization: ", model_type)
     if model_type == 'cnn':
         model = CNNAutoEncoder(**model_params)
-    elif model_type == 'lstm':
-        model = LSTMAutoEncoder(**model_params)
     elif model_type == 'deep':
         model = DeepAutoEncoder(**model_params)
+    elif model_type == 'lstm':
+        model = LSTMAutoEncoder(**model_params)
+    elif model_type == 'bilstm':
+        model = BiLSTMAutoEncoder(**model_params)
     else:
         raise ValueError('{} does not exist'.format(model_type))
 
@@ -87,7 +89,7 @@ def main():
     model_type = params['model_type']
     resample_rate = 6400
 
-    kernel = 80  # 40, 80, 120, 200
+    kernel = 120  # 40, 80, 120, 200
     stride = 1
     # model_type = 'cnn'        # 'cnn', 'deep', 'lstm'
     transform_type = 'minmax'  # 'std', 'minmax', None
@@ -104,6 +106,7 @@ def main():
 
     skip_list = [0]
     train_list = [1]
+
     for selected_state_id, selected_state in enumerate(all_state_folder):
         ds_train_list = []
         y_train_list = []
@@ -131,7 +134,6 @@ def main():
                     ds_test_list.append(ds)
                     print('Test state {} file: {}'.format(state_id, filename))
                     y_test_list.append(state_id)
-
 
         # Apply transform
         transformer = None
@@ -207,7 +209,7 @@ def main():
             if not os.path.isdir(output_dir):
                 os.makedirs(output_dir, exist_ok=True)
 
-            filename = os.path.join(output_dir, 'results_locate_{}_{}_.csv'.format(selected_state_id, model_type))
+            filename = os.path.join(output_dir, 'results_locate__{}__{}.csv'.format(selected_state_id, model_type))
             ds_res.to_csv(filename, index=False)
 
         break

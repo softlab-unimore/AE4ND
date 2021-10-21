@@ -44,21 +44,23 @@ class CNNAutoEncoder(object):
     def _define_model(self, ):
         input_series = keras.Input(shape=(self.sequence_length, self.num_features))
 
-        x = layers.Conv1D(filters=32, kernel_size=7, padding="same", strides=2, activation=self.activation)(input_series)
+        x = layers.Conv1D(filters=32, kernel_size=7, padding="same", strides=2, activation=self.activation)(
+            input_series)
         x = layers.Dropout(rate=0.2)(x)
         encoded = layers.Conv1D(filters=16, kernel_size=7, padding="same", strides=2, activation=self.activation)(x)
 
         encoder = keras.Model(input_series, encoded)
 
-        x = layers.Conv1DTranspose(filters=16, kernel_size=7, padding="same", strides=2, activation=self.activation)(encoded)
+        x = layers.Conv1DTranspose(filters=16, kernel_size=7, padding="same", strides=2, activation=self.activation)(
+            encoded)
         x = layers.Dropout(rate=0.2)(x)
         x = layers.Conv1DTranspose(filters=32, kernel_size=7, padding="same", strides=2, activation=self.activation)(x)
         decoded = layers.Conv1DTranspose(filters=self.num_features, kernel_size=7, padding="same")(x)
 
         autoencoder = keras.Model(input_series, decoded)
 
-        autoencoder.compile(optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate), loss=self.loss)
-        # model.summary()
+        optimizer = keras.optimizers.Adam(learning_rate=self.learning_rate, clipnorm=1.0, clipvalue=0.5)
+        autoencoder.compile(optimizer=optimizer, loss=self.loss)
 
         self.model = autoencoder
         self.encoder = encoder

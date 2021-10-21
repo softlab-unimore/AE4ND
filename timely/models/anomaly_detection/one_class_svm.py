@@ -16,7 +16,7 @@ from ...transforms.transformer import get_transformer
 
 class OneClassSVM(object):
 
-    def __init__(self, kernel='rbf', gamma='scale', tol=0.001, nu=0.5, shrinking=True, max_iter=1000):
+    def __init__(self, kernel='rbf', gamma='auto', tol=1e-10, nu=0.5, shrinking=True, max_iter=100000):
         """
         Unsupervised Outlier Detection.
         Arguments
@@ -37,10 +37,10 @@ class OneClassSVM(object):
         ---------
             For more information, please visit https://scikit-learn.org/stable/modules/generated/sklearn.svm.OneClassSVM.html
         """
-        self.model = SVM(kernel=kernel, gamma=gamma, tol=tol, nu=nu, shrinking=shrinking, max_iter=max_iter)
+        self.model = SVM(kernel=kernel, gamma=gamma, tol=tol, nu=nu, shrinking=shrinking, max_iter=max_iter, verbose=True)
         self.transformer = None
 
-    def fit(self, x):
+    def fit(self, x, **kwargs):
         """
         Arguments
         ---------
@@ -55,7 +55,7 @@ class OneClassSVM(object):
 
         self.model.fit(x)
 
-    def predict(self, x):
+    def predict(self, x, **kwargs):
         """ Predict anomalies with mined invariants
         Arguments
         ---------

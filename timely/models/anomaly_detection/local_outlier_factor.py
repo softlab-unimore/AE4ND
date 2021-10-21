@@ -37,7 +37,7 @@ class LOF(object):
         self.model = LocalOutlierFactor(n_neighbors=n_neighbors, algorithm=algorithm, metric=metric,
                                         contamination=0.00001, novelty=True)
 
-    def fit(self, x):
+    def fit(self, x, **kwargs):
         """
         Arguments
         ---------
@@ -48,7 +48,7 @@ class LOF(object):
         x = x.reshape((len(x), -1))
         self.model.fit(x)
 
-    def predict(self, x):
+    def predict(self, x, **kwargs):
         """ Predict anomalies with mined invariants
         Arguments
         ---------
