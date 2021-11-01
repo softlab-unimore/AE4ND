@@ -86,7 +86,7 @@ def main():
     params = get_argument()
     all_state_folder = params['all_state_folder']
     features_list = params['features_list']
-    model_type = params['model_type']
+    # model_type = params['model_type']
     resample_rate = 6400
 
     kernel = 120  # 40, 80, 120, 200
@@ -94,14 +94,14 @@ def main():
     # model_type = 'cnn'        # 'cnn', 'deep', 'lstm'
     transform_type = 'minmax'  # 'std', 'minmax', None
 
-    epochs = 100
+    epochs = 200
 
     save_result = True
     output_dir = './results'
 
     model_params = {
         'with_lazy': 0.02,  # 0.00, 0.01, 0.015, 0.02
-        'loss': 'mae'  # 'mae', 'mse'
+        # 'loss': 'mae'  # 'mae', 'mse'
     }
 
     skip_list = [0]
@@ -160,59 +160,59 @@ def main():
         x_new = x_train[order]
         y_new = y_train[order]
 
-        # Model initialization
-        print("Model initialization: {}".format(model_type))
-        model = get_deep_model(model_type, model_params=model_params)
+        for model_type in ['cnn', 'deep', 'lstm', 'bilstm']:
 
-        # Training
-        print("Training...")
-        model.fit(x=x_new, epochs=epochs, verbose=2)
+            # Model initialization
+            print("Model initialization: {}".format(model_type))
+            model = get_deep_model(model_type, model_params=model_params)
 
-        print("Anomaly accuracy")
-        y_pred = model.predict(x_test, classifier=False)
-        y_true = np.zeros(len(y_test))
-        y_true[y_test == selected_state_id] = 1
-        print(classification_report(y_true, y_pred))
+            # Training
+            print("Training...")
+            model.fit(x=x_new, epochs=epochs, verbose=2)
 
-        ds_res = pd.DataFrame(classification_report(y_true, y_pred, output_dict=True))
+            print("Anomaly accuracy")
+            y_pred = model.predict(x_test, classifier=False)
+            y_true = np.zeros(len(y_test))
+            y_true[y_test == selected_state_id] = 1
+            print(classification_report(y_true, y_pred))
 
-        if save_result:
-            if not os.path.isdir(output_dir):
-                os.makedirs(output_dir, exist_ok=True)
+            ds_res = pd.DataFrame(classification_report(y_true, y_pred, output_dict=True))
 
-            filename = os.path.join(output_dir, 'results_anomaly_{}_{}_.csv'.format(selected_state_id, model_type))
-            ds_res.to_csv(filename, index=True)
+            if save_result:
+                if not os.path.isdir(output_dir):
+                    os.makedirs(output_dir, exist_ok=True)
 
-        print("Locate Anomaly")
-        x_selected = x_test[y_test == selected_state_id]
-        y_selected = y_test[y_test == selected_state_id]
-        x_reconstructed = model.model.predict(x_selected)
+                filename = os.path.join(output_dir, 'results_anomaly_{}_{}_.csv'.format(selected_state_id, model_type))
+                ds_res.to_csv(filename, index=True)
 
-        ds_res = []
-        num_records = len(x_selected)
-        for i in range(num_records):
-            x_true = x_selected[i]
-            x_pred = x_reconstructed[i]
-            if transformer is not None:
-                x_true = transformer.inverse_transform(x_true)
-                x_pred = transformer.inverse_transform(x_pred)
+            print("Locate Anomaly")
+            x_selected = x_test[y_test == selected_state_id]
+            y_selected = y_test[y_test == selected_state_id]
+            x_reconstructed = model.model.predict(x_selected)
 
-            diff = np.mean(np.abs(x_true - x_pred), axis=0)
-            res = {k: val for k, val in zip(features_list, diff)}
-            res['threshold'] = model.threshold
-            res['score'] = y_selected[i]
-            ds_res.append(res)
+            ds_res = []
+            num_records = len(x_selected)
+            for i in range(num_records):
+                x_true = x_selected[i]
+                x_pred = x_reconstructed[i]
+                if transformer is not None:
+                    x_true = transformer.inverse_transform(x_true)
+                    x_pred = transformer.inverse_transform(x_pred)
 
-        ds_res = pd.DataFrame(ds_res)
+                diff = np.mean(np.abs(x_true - x_pred), axis=0)
+                res = {k: val for k, val in zip(features_list, diff)}
+                res['threshold'] = model.threshold
+                res['score'] = y_selected[i]
+                ds_res.append(res)
 
-        if save_result:
-            if not os.path.isdir(output_dir):
-                os.makedirs(output_dir, exist_ok=True)
+            ds_res = pd.DataFrame(ds_res)
 
-            filename = os.path.join(output_dir, 'results_locate__{}__{}.csv'.format(selected_state_id, model_type))
-            ds_res.to_csv(filename, index=False)
+            if save_result:
+                if not os.path.isdir(output_dir):
+                    os.makedirs(output_dir, exist_ok=True)
 
-        break
+                filename = os.path.join(output_dir, 'results_locate__{}__{}__{}.csv'.format(kernel, selected_state_id, model_type))
+                ds_res.to_csv(filename, index=False)
 
 
 if __name__ == '__main__':

@@ -147,6 +147,7 @@ def main():
             for cluster_name, cluster_model in cluster_models.items():
                 print('\n', cluster_name)
 
+                # ToDo: remove n_clusters params
                 cls = cluster_model(n_clusters=4)
 
                 enc_pred = x_test.reshape(len(x_test), -1)
@@ -194,6 +195,7 @@ def main():
                     print('\n', cluster_name)
                     print(enc_pred.shape)
 
+                    # ToDo: remove n_clusters params
                     cls = cluster_model(n_clusters=4)
                     y_pred = cls.fit_predict(enc_pred)
 
