@@ -115,7 +115,7 @@ class LSTMAutoEncoder(object):
 
         self.threshold = np.max(threshold, self.threshold)
 
-    def fit(self, x, y=None, epochs=100, verbose=0):
+    def fit(self, x, y=None, epochs=100, batch_size=128, verbose=0):
         print('LSTM AutoEncoder Fit')
         # Define autoencoder input params
         self._set_input(x)
@@ -127,7 +127,7 @@ class LSTMAutoEncoder(object):
         self.history = self.model.fit(
             x=x, y=x,
             epochs=epochs,
-            batch_size=128,
+            batch_size=batch_size,
             validation_split=0.1,
             verbose=verbose,
             callbacks=[
