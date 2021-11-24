@@ -81,11 +81,14 @@ def get_deep_model(model_type, model_params=None):
         model = BiLSTMAutoEncoder(**model_params)
 
     elif model_type == 'pca':
-        model = PCA()
+        model_params.pop('with_lazy', None)
+        model = PCA(**model_params)
     elif model_type == 'svm':
-        model = OneClassSVM()
+        model_params.pop('with_lazy', None)
+        model = OneClassSVM(**model_params)
     elif model_type == 'cluster':
-        model = SetupClustering()
+        model_params.pop('with_lazy', None)
+        model = SetupClustering(**model_params)
 
     else:
         raise ValueError('{} does not exist'.format(model_type))
@@ -106,7 +109,7 @@ def get_classification_report_record(report_dict):
 
 def main():
     params = get_argument()
-    all_state_folder = params['all_state_folder']
+    all_state_folder = params['all_state_folder'][:3]
     features_list = params['features_list']
     model_type = params['model_type']
     resample_rate = 6400
@@ -118,17 +121,38 @@ def main():
     output_dir = './results'
 
     params_grid = {
-        'kernel': [40, 80, 120, 200, 240, 360],
+        # 'kernel': [40, 80, 120, 200, 240, 360],
+        'kernel': [200],
         'transform_type': ['minmax'],
         'with_lazy': [0.00],  # , 0.01, 0.015, 0.02],
         # 'loss': ['mae', 'mse'],
         # 'activation': [layers.LeakyReLU(alpha=0.3), 'relu', 'tanh']
     }
-
     # if model_type == 'bilstm':
     #     params_grid['activation'] = ['relu', 'tanh']
+
     # ['cluster', 'svm', 'pca', 'cnn', 'deep', 'lstm', 'bilstm']
-    for model_type in ['cluster', 'svm', 'pca', 'cnn', 'deep', 'lstm', 'bilstm']:
+    for model_type in ['pca']:
+        if model_type == 'pca':
+            new_params = {
+                'threshold': [1, 5, 10, 20, 50, 100],
+            }
+            params_grid.update(new_params)
+
+        if model_type == 'svm':
+            new_params = {
+                'kernel': ['linear', 'poly', 'rbf', 'sigmoid', 'precomputed'],
+                'max_iter': [1000000],
+                'gamma': ['scale', 'auto'],
+            }
+            params_grid.update(new_params)
+
+        if model_type == 'cluster':
+            new_params = {
+                'max_distance': [0.01, 0.05, 0.1, 0.15, 0.2, 0.5, 1],
+                'anomaly_threshold': [None]
+            }
+            params_grid.update(new_params)
 
         skip_list = [0]
         train_list = [1]
@@ -180,11 +204,9 @@ def main():
                 kernel = grid['kernel']
                 transform_type = grid['transform_type']
 
-                model_params = {
-                    'with_lazy': grid['with_lazy'],
-                    # 'loss': grid['loss'],
-                    # 'activation': grid['activation']
-                }
+                model_params = dict(grid)
+                model_params.pop('kernel', None)
+                model_params.pop('transform_type', None)
 
                 # Apply transform
                 transformer = None
@@ -266,7 +288,7 @@ def main():
                 name = [str(x) for x in selected_states]
                 name = '_'.join(name)
 
-                filename = os.path.join(output_dir, 'results_grid_anomaly__{}__{}.csv'.format(name, model_type))
+                filename = os.path.join(output_dir, 'results_gimple_grid_anomaly__{}__{}.csv'.format(name, model_type))
                 ds_res.to_csv(filename, index=True)
 
 

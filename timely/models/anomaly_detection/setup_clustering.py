@@ -14,8 +14,15 @@ from ...transforms.transformer import get_transformer
 
 class SetupClustering(object):
 
-    def __init__(self, max_distance=0.05, anomaly_threshold=0.05, distance='mae', transformer='',
-                 mode='online', num_bootstrap_samples=5000):
+    def __init__(
+            self,
+            max_distance=0.05,
+            anomaly_threshold=0.05,
+            distance='mae',
+            transformer='',
+            mode='online',
+            num_bootstrap_samples=5000
+    ):
         """
         Attributes
         ----------
@@ -30,6 +37,8 @@ class SetupClustering(object):
         """
 
         self.max_dist = max_distance
+        if anomaly_threshold is None:
+            anomaly_threshold = max_distance
         self.anomaly_threshold = anomaly_threshold
         self.distance = self._get_distance_metric(distance)
 
