@@ -121,8 +121,7 @@ def main():
     output_dir = './results'
 
     params_grid = {
-        # 'kernel': [40, 80, 120, 200, 240, 360],
-        'kernel': [200],
+        'kernel': [40, 80, 120, 200, 240, 360],
         'transform_type': ['minmax'],
         'with_lazy': [0.00],  # , 0.01, 0.015, 0.02],
         # 'loss': ['mae', 'mse'],
@@ -132,7 +131,7 @@ def main():
     #     params_grid['activation'] = ['relu', 'tanh']
 
     # ['cluster', 'svm', 'pca', 'cnn', 'deep', 'lstm', 'bilstm']
-    for model_type in ['pca']:
+    for model_type in ['pca', 'svm', 'cluster']:
         if model_type == 'pca':
             new_params = {
                 'threshold': [1, 5, 10, 20, 50, 100],
@@ -141,7 +140,7 @@ def main():
 
         if model_type == 'svm':
             new_params = {
-                'kernel': ['linear', 'poly', 'rbf', 'sigmoid', 'precomputed'],
+                'skernel': ['linear', 'poly', 'rbf', 'sigmoid', 'precomputed'],
                 'max_iter': [1000000],
                 'gamma': ['scale', 'auto'],
             }
@@ -207,6 +206,9 @@ def main():
                 model_params = dict(grid)
                 model_params.pop('kernel', None)
                 model_params.pop('transform_type', None)
+                if 'skernel' in model_params:
+                    model_params['kernel'] = model_params['skernel']
+                    model_params.pop('skernel', None)
 
                 # Apply transform
                 transformer = None

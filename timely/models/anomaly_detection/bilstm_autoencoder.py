@@ -46,11 +46,11 @@ class BiLSTMAutoEncoder(object):
 
         # BiLSTM encoder
         x = layers.Bidirectional(
-            layers.LSTM(200, activation=self.activation, return_sequences=True)
+            layers.LSTM(100, activation=self.activation, return_sequences=True)
         )(input_series)
 
         encoded = layers.Bidirectional(
-            layers.LSTM(100, activation=self.activation, dropout=0.2, return_sequences=False)
+            layers.LSTM(50, activation=self.activation, dropout=0.2, return_sequences=False)
         )(x)
 
         encoder = keras.Model(input_series, encoded)
@@ -59,13 +59,13 @@ class BiLSTMAutoEncoder(object):
         x = layers.RepeatVector(self.sequence_length)(encoded)
 
         x = layers.Bidirectional(
-            layers.LSTM(100, activation=self.activation, return_sequences=True)
+            layers.LSTM(50, activation=self.activation, return_sequences=True)
         )(x)
         x = layers.Bidirectional(
-            layers.LSTM(200, activation=self.activation, return_sequences=True)
+            layers.LSTM(100, activation=self.activation, return_sequences=True)
         )(x)
 
-        x = layers.TimeDistributed(layers.Dense(16))(x)
+        x = layers.TimeDistributed(layers.Dense(100, activation=self.activation))(x)
 
         decoded = layers.TimeDistributed(layers.Dense(self.num_features))(x)
 
