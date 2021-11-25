@@ -16,7 +16,7 @@ from ...transforms.transformer import get_transformer
 
 class OneClassSVM(object):
 
-    def __init__(self, kernel='rbf', gamma='auto', tol=1e-10, nu=0.5, shrinking=True, max_iter=100000):
+    def __init__(self, kernel='poly', gamma='auto', tol=1e-10, nu=0.5, shrinking=True, max_iter=100000):
         """
         Unsupervised Outlier Detection.
         Arguments

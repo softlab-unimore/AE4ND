@@ -16,8 +16,8 @@ class SetupClustering(object):
 
     def __init__(
             self,
-            max_distance=0.05,
-            anomaly_threshold=0.05,
+            max_distance=0.15,
+            anomaly_threshold=0.15,
             distance='mae',
             transformer='',
             mode='online',

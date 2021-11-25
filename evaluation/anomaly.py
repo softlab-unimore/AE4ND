@@ -115,7 +115,7 @@ def main():
     resample_rate = 6400
 
     stride = 1
-    epochs = 200
+    epochs = 300
 
     save_result = True
     output_dir = './results'
@@ -130,28 +130,7 @@ def main():
     # if model_type == 'bilstm':
     #     params_grid['activation'] = ['relu', 'tanh']
 
-    # ['cluster', 'svm', 'pca', 'cnn', 'deep', 'lstm', 'bilstm']
-    for model_type in ['pca', 'svm', 'cluster']:
-        if model_type == 'pca':
-            new_params = {
-                'threshold': [1, 5, 10, 20, 50, 100],
-            }
-            params_grid.update(new_params)
-
-        if model_type == 'svm':
-            new_params = {
-                'skernel': ['linear', 'poly', 'rbf', 'sigmoid', 'precomputed'],
-                'max_iter': [1000000],
-                'gamma': ['scale', 'auto'],
-            }
-            params_grid.update(new_params)
-
-        if model_type == 'cluster':
-            new_params = {
-                'max_distance': [0.01, 0.05, 0.1, 0.15, 0.2, 0.5, 1],
-                'anomaly_threshold': [None]
-            }
-            params_grid.update(new_params)
+    for model_type in ['pca', 'svm', 'cluster' 'cnn', 'deep', 'lstm', 'bilstm']:
 
         skip_list = [0]
         train_list = [1]
@@ -241,13 +220,13 @@ def main():
 
                 # Training
                 print("Training...")
-                model.fit(x=x_new, epochs=epochs, verbose=2)
+                model.fit(x=x_new, epochs=epochs, batch_size=64, verbose=2)
 
                 if model_type in ['cnn', 'deep', 'lstm', 'bilstm']:
                     original_threshold = model.threshold
                     print('Anomaly threshold: ', original_threshold)
-
-                    for th in [0.00, 0.01, 0.015, 0.02]:
+                    thresholds = [0.00, 0.01, 0.015, 0.02, 0.03, 0.05, 0.07, 0.1, 0.125, 0.15]
+                    for th in thresholds:
                         model.threshold = original_threshold + th
                         print('\n Lazy ', model.threshold)
 
@@ -290,7 +269,7 @@ def main():
                 name = [str(x) for x in selected_states]
                 name = '_'.join(name)
 
-                filename = os.path.join(output_dir, 'results_gimple_grid_anomaly__{}__{}.csv'.format(name, model_type))
+                filename = os.path.join(output_dir, 'results_simple_grid_anomaly__{}__{}.csv'.format(name, model_type))
                 ds_res.to_csv(filename, index=True)
 
 

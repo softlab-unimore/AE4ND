@@ -14,7 +14,7 @@ import numpy as np
 
 class PCA(object):
 
-    def __init__(self, n_components=0.95, threshold=5, c_alpha=3.2905):
+    def __init__(self, n_components=0.95, threshold=None, c_alpha=3.2905):
         """
         The PCA models for anomaly detection
         Arguments
@@ -40,6 +40,18 @@ class PCA(object):
         self.n_components = n_components
         self.threshold = threshold
         self.c_alpha = c_alpha
+
+    def _compute_simple_threshold(self, x):
+        X = x.reshape((len(x), -1))
+        assert self.proj_C is not None  # PCA models needs to be trained before prediction.
+        y_pred = np.zeros(X.shape[0])
+        errors = []
+        for i in range(X.shape[0]):
+            y_a = np.dot(self.proj_C, X[i, :])
+            SPE = np.dot(y_a, y_a)
+            errors.append(SPE)
+
+        self.threshold = np.max(errors)
 
     def fit(self, x, **kwargs):
         """
@@ -71,16 +83,19 @@ class PCA(object):
         print('Project matrix shape: {}-by-{}'.format(self.proj_C.shape[0], self.proj_C.shape[1]))
 
         if not self.threshold:
-            # Calculate threshold using Q-statistic. Information can be found at:
-            # http://conferences.sigcomm.org/sigcomm/2004/papers/p405-lakhina111.pdf
-            phi = np.zeros(3)
-            for i in range(3):
-                for j in range(n_components, num_events):
-                    phi[i] += np.power(sigma[j], i + 1)
-            h0 = 1.0 - 2 * phi[0] * phi[2] / (3.0 * phi[1] * phi[1])
-            self.threshold = phi[0] * np.power(self.c_alpha * np.sqrt(2 * phi[1] * h0 * h0) / phi[0]
-                                               + 1.0 + phi[1] * h0 * (h0 - 1) / (phi[0] * phi[0]),
-                                               1.0 / h0)
+            # # Calculate threshold using Q-statistic. Information can be found at:
+            # # http://conferences.sigcomm.org/sigcomm/2004/papers/p405-lakhina111.pdf
+            # phi = np.zeros(3)
+            # for i in range(3):
+            #     for j in range(n_components, num_events):
+            #         phi[i] += np.power(sigma[j], i + 1)
+            # h0 = 1.0 - 2 * phi[0] * phi[2] / (3.0 * phi[1] * phi[1])
+            # self.threshold = phi[0] * np.power(self.c_alpha * np.sqrt(2 * phi[1] * h0 * h0) / phi[0]
+            #                                    + 1.0 + phi[1] * h0 * (h0 - 1) / (phi[0] * phi[0]),
+            #                                    1.0 / h0)
+
+            self._compute_simple_threshold(x)
+
         print('SPE threshold: {}\n'.format(self.threshold))
 
     def predict(self, x, **kwargs):
