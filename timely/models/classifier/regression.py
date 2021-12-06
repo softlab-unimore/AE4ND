@@ -5,6 +5,8 @@ The implementation of Deep AutoEncoder models for anomaly detection.
 import numpy as np
 
 from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+
 
 class LinearClassifier(object):
 
@@ -34,10 +36,12 @@ class LinearClassifier(object):
         self.num_class = len(np.unique(y))
 
     def _define_model(self, ):
-        self.model = LogisticRegression(
-            max_iter=self.max_iter,
-            verbose=self.verbose,
-        )
+        # self.model = LogisticRegression(
+        #     max_iter=self.max_iter,
+        #     verbose=self.verbose,
+        # )
+
+        self.model = LogisticRegression()
 
     def fit(self, x, y, **kwargs):
         print('Linear Fit')

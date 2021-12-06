@@ -73,8 +73,8 @@ class CNNAutoEncoder(object):
 
         x = self.encoder(input_series)
         x = layers.Flatten()(x)
-        x = layers.Dense(200, activation='relu')(x)
-        x = layers.Dense(64, activation='relu')(x)
+        x = layers.Dense(200, activation='tanh')(x)
+        x = layers.Dense(64, activation='tanh')(x)
         x = layers.Dense(self.num_class, activation='softmax')(x)
 
         self.classifier = keras.Model(input_series, x)
@@ -116,7 +116,7 @@ class CNNAutoEncoder(object):
 
         self.threshold = np.max(threshold, self.threshold)
 
-    def fit(self, x, y=None, epochs=100, batch_size=128,verbose=0):
+    def fit(self, x, y=None, epochs=100, batch_size=64, verbose=0):
         print('CNN AutoEncoder Fit')
         # Define autoencoder input params
         self._set_input(x)
@@ -149,7 +149,7 @@ class CNNAutoEncoder(object):
             self.history_classifier = self.classifier.fit(
                 x=x, y=y,
                 epochs=epochs,
-                batch_size=128,
+                batch_size=batch_size,
                 validation_split=0.1,
                 verbose=verbose,
                 callbacks=[

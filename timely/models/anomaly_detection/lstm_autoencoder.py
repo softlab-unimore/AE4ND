@@ -73,7 +73,8 @@ class LSTMAutoEncoder(object):
 
         x = self.encoder(input_series)
         x = layers.Flatten()(x)
-        x = layers.Dense(64, activation='relu')(x)
+        x = layers.Dense(200, activation='tanh')(x)
+        x = layers.Dense(64, activation='tanh')(x)
         x = layers.Dense(self.num_class, activation='softmax')(x)
 
         self.classifier = keras.Model(input_series, x)
@@ -148,7 +149,7 @@ class LSTMAutoEncoder(object):
             self.history_classifier = self.classifier.fit(
                 x=x, y=y,
                 epochs=epochs,
-                batch_size=128,
+                batch_size=batch_size,
                 validation_split=0.1,
                 verbose=verbose,
                 callbacks=[

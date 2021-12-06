@@ -109,7 +109,7 @@ def get_classification_report_record(report_dict):
 
 def main():
     params = get_argument()
-    all_state_folder = params['all_state_folder'][:3]
+    all_state_folder = params['all_state_folder'][:]
     features_list = params['features_list']
     model_type = params['model_type']
     resample_rate = 6400
@@ -130,7 +130,7 @@ def main():
     # if model_type == 'bilstm':
     #     params_grid['activation'] = ['relu', 'tanh']
 
-    for model_type in ['pca', 'svm', 'cluster' 'cnn', 'deep', 'lstm', 'bilstm']:
+    for model_type in ['pca', 'svm', 'cluster', 'cnn', 'deep', 'lstm', 'bilstm']:
 
         skip_list = [0]
         train_list = [1]
@@ -269,7 +269,7 @@ def main():
                 name = [str(x) for x in selected_states]
                 name = '_'.join(name)
 
-                filename = os.path.join(output_dir, 'results_simple_grid_anomaly__{}__{}.csv'.format(name, model_type))
+                filename = os.path.join(output_dir, 'results_grid_anomaly__{}__{}.csv'.format(name, model_type))
                 ds_res.to_csv(filename, index=True)
 
 

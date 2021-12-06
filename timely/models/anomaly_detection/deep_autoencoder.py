@@ -47,9 +47,9 @@ class DeepAutoEncoder(object):
 
         # Deep encoder
         x = layers.Flatten()(input_series)
-        x = layers.Dense(200, activation=self.activation)(x)
+        x = layers.Dense(self.sequence_length * self.num_features, activation=self.activation)(x)
         x = layers.Dropout(rate=0.2)(x)
-        x = layers.Dense(100, activation=self.activation)(x)
+        x = layers.Dense(200, activation=self.activation)(x)
         encoded = layers.Dense(100, activation=self.activation)(x)
 
         encoder = keras.Model(input_series, encoded)
@@ -77,7 +77,8 @@ class DeepAutoEncoder(object):
 
         x = self.encoder(input_series)
         x = layers.Flatten()(x)
-        x = layers.Dense(64, activation='relu')(x)
+        x = layers.Dense(200, activation='tanh')(x)
+        x = layers.Dense(64, activation='tanh')(x)
         x = layers.Dense(self.num_class, activation='softmax')(x)
 
         self.classifier = keras.Model(input_series, x)
@@ -152,7 +153,7 @@ class DeepAutoEncoder(object):
             self.history_classifier = self.classifier.fit(
                 x=x, y=y,
                 epochs=epochs,
-                batch_size=128,
+                batch_size=batch_size,
                 validation_split=0.1,
                 verbose=verbose,
                 callbacks=[

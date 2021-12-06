@@ -63,9 +63,9 @@ def main():
     resample_rate = 6400
 
     stride = 1
-    epochs = 500
+    epochs = 300
 
-    transform_type = None # 'minmax'
+    transform_type = None  # 'minmax'
 
     save_result = True
     output_dir = './results'
@@ -134,7 +134,7 @@ def main():
             x_new = x_train[order]
             y_new = y_train[order]
 
-            for model_type in ['linear', 'classifier', 'cnn', 'deep', 'lstm', 'bilstm']:
+            for model_type in ['linear', 'deep', 'lstm', 'bilstm']:
 
                 # Model initialization
                 print("Model initialization: {}".format(model_type))
@@ -142,7 +142,7 @@ def main():
 
                 # Training
                 print("Training...")
-                model.fit(x=x_new, y=y_new, epochs=epochs, verbose=2)
+                model.fit(x=x_new, y=y_new, epochs=epochs, batch_size=32, verbose=2)
 
                 y_pred = model.predict(x_test, classifier=True)
 
@@ -153,7 +153,8 @@ def main():
                     if not os.path.isdir(output_dir):
                         os.makedirs(output_dir, exist_ok=True)
 
-                    filename = os.path.join(output_dir, 'results_{}_accuracy_{}_{}.csv'.format(train_id, model_type, kernel))
+                    filename = os.path.join(output_dir,
+                                            'results_{}_accuracy_{}_{}.csv'.format(train_id, model_type, kernel))
                     ds_res.to_csv(filename, index=True)
 
 
