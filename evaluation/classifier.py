@@ -65,12 +65,12 @@ def main():
     stride = 1
     epochs = 300
 
-    transform_type = None  # 'minmax'
+    transform_type = 'minmax'  # 'minmax'
 
     save_result = True
     output_dir = './results'
 
-    for train_id in [1, 2]:
+    for train_id in [1, 2, 0]:
         skip_list = []
         train_list = [train_id]
         ds_train_list = []
@@ -134,7 +134,7 @@ def main():
             x_new = x_train[order]
             y_new = y_train[order]
 
-            for model_type in ['linear', 'deep', 'lstm', 'bilstm']:
+            for model_type in ['classifier', 'linear', 'cnn', 'deep', 'lstm', 'bilstm']:
 
                 # Model initialization
                 print("Model initialization: {}".format(model_type))
