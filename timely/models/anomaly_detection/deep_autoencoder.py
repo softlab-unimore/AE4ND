@@ -47,7 +47,8 @@ class DeepAutoEncoder(object):
 
         # Deep encoder
         x = layers.Flatten()(input_series)
-        x = layers.Dense(self.sequence_length * self.num_features, activation=self.activation)(x)
+        # x = layers.Dense(self.sequence_length * self.num_features, activation=self.activation)(x)
+        x = layers.Dense(200, activation=self.activation)(x)
         x = layers.Dropout(rate=0.2)(x)
         x = layers.Dense(200, activation=self.activation)(x)
         encoded = layers.Dense(100, activation=self.activation)(x)
