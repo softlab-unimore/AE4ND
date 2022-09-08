@@ -53,8 +53,8 @@ $ pip install -r requirements.txt
 Please contact us to have access to the data, for research purposes.
 
 ### How to Use
+Look at:
+- *demo.py* is a python example of novelty detection application
+- Note: you can run **[this notebook live in Google Colab](https://colab.research.google.com/github/softlab-unimore/SBDIOI40/blob/master/demo.ipynb)** and use free GPUs provided by Google.
 
-Inside the *timely* folder, there are the models and transformed implemented and tested in industrial use case, 
-instead in *demo* there is an example of anomaly detection application
-
-
+Please feel free to contact me if you need any further information
