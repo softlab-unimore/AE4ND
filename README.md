@@ -55,6 +55,6 @@ Please contact us to have access to the data, for research purposes.
 ### How to Use
 Look at:
 - *demo.py* is a python example of novelty detection application
-- Note: you can run **[this notebook live in Google Colab](https://colab.research.google.com/github/softlab-unimore/SBDIOI40/blob/master/demo.ipynb)** and use free GPUs provided by Google.
+- Note: you can run **[this notebook live in Google Colab](https://colab.research.google.com/github/softlab-unimore/AE4ND/blob/master/demo.ipynb)** and use free GPUs provided by Google.
 
 Please feel free to contact me if you need any further information
