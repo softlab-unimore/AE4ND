@@ -18,7 +18,7 @@ features_list:      The features selected in the provided files ([] all features
 kernel:             Windows size 
 stride:             Value of sliding windows 
 resample_rate:      Resample frequency to apply an average windows if custom_resample is False, 
-custom_resample:    True apply a custom resample strategy by extracting features from timely domain 
+custom_resample:    True apply a custom resample strategy by extracting features from ae4nd domain 
 model_type:         Model selected for anomaly detection: 
                         DL based: cnn, deep, lstm 
                         ML based: isolation_forest, setup_clustering, pca, svm, lof 
