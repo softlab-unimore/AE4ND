@@ -1,5 +1,4 @@
 matplotlib
-fastdtw
 joblib
 numpy
 pandas
